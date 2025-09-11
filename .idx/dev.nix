@@ -5,6 +5,7 @@
   channel = "stable-24.05"; # or "unstable"
   # Use https://search.nixos.org/packages to find packages
   packages = [
+    pkgs.bun
     # pkgs.go
     # pkgs.python311
     # pkgs.python311Packages.pip
@@ -16,7 +17,11 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      # "vscodevim.vim"
+      "vivaxy.vscode-conventional-commits"
+      "usernamehw.errorlens"
+      "streetsidesoftware.code-spell-checker"
+      "yoavbls.pretty-ts-errors"
+      "vscodevim.vim"
       "google.gemini-cli-vscode-ide-companion"
     ];
     # Enable previews

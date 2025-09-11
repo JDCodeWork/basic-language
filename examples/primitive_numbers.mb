@@ -1,0 +1,8 @@
+BOOL 0
+BOOL 123
+
+STR (Hello world)
+"Hello world"
+
+NUM 1234
+324.123

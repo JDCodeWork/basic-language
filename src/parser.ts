@@ -33,8 +33,6 @@ export class Parser {
           break;
       }
     }
-
-    console.log(this.tokens)
   }
 
   private bool() {

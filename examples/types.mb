@@ -1,5 +1,5 @@
-BOOL 0
-BOOL 123
+BOOL 0 # Result: False
+BOOL 123 # Result: True
 
 STR (Hello world)
 "Hello world"

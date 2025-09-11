@@ -5,25 +5,35 @@ export interface RawToken {
 }
 
 export class Scanner {
-    static scan(source: string) {
-        let currLine = 0
-        let currCol = 0
+    private currLine = 0
+    private currCol = 0
 
+    constructor(
+        private source: string
+    ) { }
+
+    scan() {
         const rawTokens: RawToken[] = []
-        const lines = source.trim().split('\n')
+        const lines = this.source.trim().split('\n')
 
         for (const line of lines) {
-            currLine++
-            currCol = 0
+            this.currLine++
+            this.currCol = 0
 
             for (const word of line.split(' ')) {
+                if (word == "#" ) {
+                    break;
+                }
+
+                if(word.length == 0) continue;
+
                 rawTokens.push({
                     value: word,
-                    line: currLine,
-                    column: currCol
+                    line: this.currLine,
+                    column: this.currCol
                 })
 
-                currCol += word.length + 1
+                this.currCol += word.length + 1
             }
         }
 

@@ -19,7 +19,9 @@ async function main() {
 
         const fileSource = await readFile(filePath)
 
-        const rawTokens = Scanner.scan(fileSource)
+        const rawTokens = new Scanner(fileSource).scan()
+
+        console.log(rawTokens)
         new Parser(rawTokens).parse()
     } catch (error: any) {
         console.error(error.cause)

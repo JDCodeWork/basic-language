@@ -18,10 +18,18 @@ export class Parser {
         case "STR":
           this.primitiveStr()
           break;
+        case "NUM": 
+          this.primitiveNum()
+          break;
         default:
-          if (this.curr().value.startsWith('"')) {
+          const currTokVal = this.curr().value
+
+          if (currTokVal.startsWith('"')) {
             this.str()
+          } else if (!isNaN(Number(currTokVal))) {
+            this.num()
           } else this.consume()
+
           break;
       }
     }
@@ -63,9 +71,19 @@ export class Parser {
     this.tokens.push(token)
   }
 
+  private num() {
+    const numToken = this.consume()
+    const numVal = parseFloat(numToken.value)
+
+    const token = new NumToken(numVal, numToken.line, numToken.column)
+
+    this.tokens.push(token)
+  }
+
   private primitiveStr() {
     if (this.curr().value == "STR") this.consume()
 
+    // Check correct syntax
     if (!this.curr().value.startsWith('(')) {
       throw new Error('SYNTAX', { cause: `Invalid string at ${this.curr().line}:${this.curr().column}. String must be start with: (` })
     }
@@ -73,6 +91,7 @@ export class Parser {
     let strValue = ''
     const startToken = this.curr()
 
+    // Sanitize string
     while (!this.curr().value.endsWith(')')) {
       let rawVal = this.consume().value
 
@@ -81,8 +100,25 @@ export class Parser {
       strValue += rawVal + " "
     }
 
+    // Sanitize end string
     strValue += this.consume().value.replace(')', '')
     const token = new StrToken(strValue, startToken.line, startToken.column)
+
+    this.tokens.push(token)
+  }
+
+  private primitiveNum() {
+    if (this.curr().value == "NUM") this.consume()
+
+    // Check correct syntax
+    const numToken = this.consume()
+    const numVal = parseFloat(numToken.value)
+
+    if (isNaN(numVal)) {
+      throw new Error('SYNTAX', { cause: `Invalid number at ${this.curr().line}:${this.curr().column}.` })
+    }
+
+    const token = new NumToken(numVal, numToken.line, numToken.column)
 
     this.tokens.push(token)
   }

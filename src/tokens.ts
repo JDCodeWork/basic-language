@@ -18,15 +18,12 @@ export class StrToken implements IToken<string> {
 
 export class NumToken implements IToken<number> {
     public type = 'NUM'
-    public literal: number
 
     constructor(
-        literal: string,
+        public literal: number,
         public line: number,
         public column: number
-    ) {
-        this.literal = parseFloat(literal)
-    }
+    ) { }
 }
 
 export class BoolToken implements IToken<boolean> {

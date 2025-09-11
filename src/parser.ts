@@ -2,55 +2,104 @@ import type { RawToken } from "./scanner";
 import { BoolToken, NumToken, StrToken, type IToken } from "./tokens";
 
 export class Parser {
-    private tokens: IToken<any>[] = []
-    private col = 0
+  private tokens: IToken<any>[] = []
+  private col = 0
 
-    constructor(
-        private rawTokens: RawToken[]
-    ) { }
+  constructor(
+    private rawTokens: RawToken[]
+  ) { }
 
-    parse() {
-        while (this.rawTokens.length > this.col) {
-            const currToken = this.rawTokens[this.col]
-
-            switch (currToken.value) {
-                case "BOOL":
-                    this.bool(currToken)
-                    break;
-                case "STR":
-                    this.str(currToken)
-                    break;
-                default:
-                    this.col++
-                    break;
-            }
-
-        }
-
-        console.log(this.tokens)
+  parse() {
+    while (this.rawTokens.length > this.col) {
+      switch (this.curr().value) {
+        case "BOOL":
+          this.bool()
+          break;
+        case "STR":
+          this.primitiveStr()
+          break;
+        default:
+          if (this.curr().value.startsWith('"')) {
+            this.str()
+          } else this.consume()
+          break;
+      }
     }
 
-    bool(curr: RawToken) {
-        const val = this.rawTokens[++this.col]
-        const token = new BoolToken(val.value, curr.line, curr.column)
+    console.log(this.tokens)
+  }
 
-        this.tokens.push(token)
+  private bool() {
+    const dec = this.consume()
+    const lit = this.consume()
+
+    const token = new BoolToken(lit.value, dec.line, dec.column)
+
+    this.tokens.push(token)
+  }
+
+  private str() {
+    // Check correct syntax
+    if (!this.curr().value.startsWith('"')) {
+      throw new Error('SYNTAX', { cause: `Invalid string at ${this.curr().line}:${this.curr().column}. String must be start with: " ` })
     }
 
-    str(currToken: RawToken) {
-        let strValue = ''
+    let strValue = ''
+    const startToken = this.curr()
 
-        let nextToken = this.rawTokens[++this.col]
-        if (!nextToken.value.startsWith('(')) throw new Error('SYNTAX', { cause: "Invalid string" })
+    // Sanitize string
+    while (!this.curr().value.endsWith('"')) {
+      let rawVal = this.consume().value
 
-        while (!nextToken.value.endsWith(')')) {
-            strValue += nextToken.value.replace('(', '') + " "
-            nextToken = this.rawTokens[++this.col]
-        }
+      if (rawVal.endsWith('"')) rawVal = rawVal.replace('"', '')
 
-        strValue += nextToken.value.replace(')', '')
-        const token = new StrToken(strValue, currToken.line, currToken.column)
-
-        this.tokens.push(token)
+      strValue += rawVal + " "
     }
+
+    // Sanitize end string
+    strValue += this.consume().value.replace(')', '')
+    const token = new StrToken(strValue, startToken.line, startToken.column)
+
+    this.tokens.push(token)
+  }
+
+  private primitiveStr() {
+    if (this.curr().value == "STR") this.consume()
+
+    if (!this.curr().value.startsWith('(')) {
+      throw new Error('SYNTAX', { cause: `Invalid string at ${this.curr().line}:${this.curr().column}. String must be start with: (` })
+    }
+
+    let strValue = ''
+    const startToken = this.curr()
+
+    while (!this.curr().value.endsWith(')')) {
+      let rawVal = this.consume().value
+
+      if (rawVal.startsWith('(')) rawVal = rawVal.replace('(', '')
+
+      strValue += rawVal + " "
+    }
+
+    strValue += this.consume().value.replace(')', '')
+    const token = new StrToken(strValue, startToken.line, startToken.column)
+
+    this.tokens.push(token)
+  }
+
+  private next() {
+    return this.rawTokens[this.col + 1]
+  }
+
+  private prev() {
+    return this.rawTokens[this.col + 1]
+  }
+
+  private consume() {
+    return this.rawTokens[this.col++]
+  }
+
+  private curr() {
+    return this.rawTokens[this.col]
+  }
 }

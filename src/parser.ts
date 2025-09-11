@@ -33,6 +33,8 @@ export class Parser {
           break;
       }
     }
+
+    return this.tokens
   }
 
   private bool() {
@@ -57,13 +59,13 @@ export class Parser {
     while (!this.curr().value.endsWith('"')) {
       let rawVal = this.consume().value
 
-      if (rawVal.endsWith('"')) rawVal = rawVal.replace('"', '')
+      if (rawVal.startsWith('"')) rawVal = rawVal.replace('"', '')
 
       strValue += rawVal + " "
     }
 
     // Sanitize end string
-    strValue += this.consume().value.replace(')', '')
+    strValue += this.consume().value.replace('"', '')
     const token = new StrToken(strValue, startToken.line, startToken.column)
 
     this.tokens.push(token)

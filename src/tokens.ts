@@ -43,6 +43,66 @@ export class BoolToken implements IToken<boolean> {
     }
 }
 
+export class EqualityToken implements IToken<string> {
+    public type = 'EQUALITY'
+    public literal = 'EQ'
+
+    constructor(
+        public line: number,
+        public column: number
+    ) { }
+}
+
+export class GreaterThanToken implements IToken<string> {
+    public type = 'GREATER_THAN'
+    public literal = 'GT'
+
+    constructor(
+        public line: number,
+        public column: number
+    ) { }
+}
+
+export class LessThanToken implements IToken<string> {
+    public type = 'LESS_THAN'
+    public literal = 'LT'
+
+    constructor(
+        public line: number,
+        public column: number
+    ) { }
+}
+
+export class AndToken implements IToken<string> {
+    public type = 'AND'
+    public literal = 'AND'
+
+    constructor(
+        public line: number,
+        public column: number
+    ) { }
+}
+
+export class OrToken implements IToken<string> {
+    public type = 'OR'
+    public literal = 'OR'
+
+    constructor(
+        public line: number,
+        public column: number
+    ) { }
+}
+
+export class NotToken implements IToken<string> {
+    public type = 'NOT'
+    public literal = 'NOT'
+
+    constructor(
+        public line: number,
+        public column: number
+    ) { }
+}
+
 export class OpenRoundBracketToken implements IToken<string> {
     public type = 'OPEN_ROUND_BRACKET'
     public literal = '('

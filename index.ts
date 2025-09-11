@@ -18,11 +18,11 @@ async function main() {
         const filePath = process.argv[2]
 
         const fileSource = await readFile(filePath)
-
         const rawTokens = new Scanner(fileSource).scan()
 
-        console.log(rawTokens)
-        new Parser(rawTokens).parse()
+        const tokens = new Parser(rawTokens).parse()
+
+        console.log(tokens)
     } catch (error: any) {
         console.error(error.cause)
     }

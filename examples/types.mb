@@ -1,8 +1,8 @@
-BOOL 0 # Result: False
-BOOL 123 # Result: True
+BOOL 0 # Literal: False
+BOOL 123 # Literal: True
 
-STR (Hello world)
-"Hello world"
+STR (Hello world) # Literal: Hello world
+"Hello world 2" # Literal: Hello world 2
 
-NUM 1234
-324.123
+NUM 1234 # Literal: 1234
+324.123 # Literal: 324.123

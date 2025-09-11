@@ -1,4 +1,10 @@
-2 EQ 3
+1 EQ 1 # -> Result: True
+2 GT 1 # -> Result: True
+2 LT 1 # -> Result: False
 
-3.16 GT 1
+True AND False # -> Result: False
+True OR False # -> Result: True
+NOT False # -> Result: True
 
+(1 EQ 1) AND (2 NOT EQ  2) # -> Result: False
+2 GT 1 OR 2 LT 1

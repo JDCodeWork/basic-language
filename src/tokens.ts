@@ -6,120 +6,138 @@ export interface IToken<T> {
     column: number
 }
 
-export class StrToken implements IToken<string> {
-    public type = 'STR'
+
+abstract class TokenBase<T> implements IToken<T> {
+    abstract type: string
 
     constructor(
-        public literal: string,
+        public literal: T,
         public line: number,
         public column: number
     ) { }
-}
 
-export class NumToken implements IToken<number> {
-    public type = 'NUM'
+    toString(): string {
+        const typeCol = this.type.padEnd(20);
+        const literalCol = String(this.literal).padStart(4).padEnd(20);
+        const lineCol = String(this.line).padStart(4);
+        const colCol = String(this.column).padStart(2, '0');
 
-    constructor(
-        public literal: number,
-        public line: number,
-        public column: number
-    ) { }
-}
-
-export class BoolToken implements IToken<boolean> {
-    public type = 'BOOL'
-    public literal: boolean
-
-    constructor(
-        literal: string,
-        public line: number,
-        public column: number
-    ) {
-        if (literal == "0" || literal == 'False') {
-            this.literal = false
-        } else {
-            this.literal = true
-        }
+        return `${typeCol} | ${literalCol} | ${lineCol}:${colCol}`;
     }
 }
 
-export class EqualityToken implements IToken<string> {
+export class StrToken extends TokenBase<string> {
+    public type = 'STR'
+}
+
+export class NumToken extends TokenBase<number> {
+    public type = 'NUM'
+}
+
+export class BoolToken extends TokenBase<boolean> {
+    public type = 'BOOL'
+
+    constructor(
+        literal: string,
+        line: number,
+        column: number
+    ) {
+        let literalBol
+        if (literal == "0" || literal == 'False') {
+            literalBol = false
+        } else {
+            literalBol = true
+        }
+
+        super(literalBol, line, column)
+    }
+}
+
+export class EqualityToken extends TokenBase<string> {
     public type = 'EQUALITY'
-    public literal = 'EQ'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('EQ', line, column)
+    }
 }
 
-export class GreaterThanToken implements IToken<string> {
+export class GreaterThanToken extends TokenBase<string> {
     public type = 'GREATER_THAN'
-    public literal = 'GT'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('GT', line, column)
+    }
 }
 
-export class LessThanToken implements IToken<string> {
+export class LessThanToken extends TokenBase<string> {
     public type = 'LESS_THAN'
-    public literal = 'LT'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('LT', line, column)
+    }
 }
 
-export class AndToken implements IToken<string> {
+export class AndToken extends TokenBase<string> {
     public type = 'AND'
-    public literal = 'AND'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('AND', line, column)
+    }
 }
 
-export class OrToken implements IToken<string> {
+export class OrToken extends TokenBase<string> {
     public type = 'OR'
-    public literal = 'OR'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('OR', line, column)
+    }
 }
 
-export class NotToken implements IToken<string> {
+export class NotToken extends TokenBase<string> {
     public type = 'NOT'
-    public literal = 'NOT'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('NOT', line, column)
+    }
 }
 
-export class OpenRoundBracketToken implements IToken<string> {
+export class OpenRoundBracketToken extends TokenBase<string> {
     public type = 'OPEN_ROUND_BRACKET'
-    public literal = '('
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super('(', line, column)
+    }
 }
 
-export class CloseRoundBracketToken implements IToken<string> {
+export class CloseRoundBracketToken extends TokenBase<string> {
     public type = 'CLOSE_ROUND_BRACKET'
-    public literal = ')'
 
     constructor(
-        public line: number,
-        public column: number
-    ) { }
+        line: number,
+        column: number
+    ) {
+        super(')', line, column)
+    }
 }
 

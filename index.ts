@@ -22,7 +22,9 @@ async function main() {
 
         const tokens = new Parser(rawTokens).parse()
 
-        console.log(tokens)
+        for (const token of tokens) {
+            console.log(token.toString())
+        }
     } catch (error: any) {
         console.error(error.cause)
     }

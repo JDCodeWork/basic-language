@@ -1,22 +1,36 @@
 # Modern Basic Language
 
-## Primitive values
+This document provides an overview of the Modern Basic programming language, including its syntax, data types, and features.
+
+## The Stack
+
+The stack is a crucial component of the Modern Basic runtime. It serves as a temporary storage area for primitive values during program execution. When a value is needed for an operation or a function call, it can be pushed onto the stack. When the operation is complete, the value can be popped off the stack.
+
+## Primitive Values
+
+Modern Basic supports the following primitive data types:
+
+*   **Boolean (`BOOL`):** Represents truth values. `0` is treated as `False`, and any other number is treated as `True`. The literals `True` and `False` can also be used.
+*   **Number (`NUM`):** Represents both integers and floating-point numbers.
+*   **String (`STR`):** Represents a sequence of characters. Strings can be enclosed in double quotes (`"`) or parentheses (`()`).
 
 ### Syntax
+
 ```
-# Can be numbers or literals
-# 0 is False, x number is True
-# Literals are True and False
-BOOL <value> 
+BOOL <value>  # 0 is False, any other number is True.
+True
+False
 
-# Can be any number (not difference between integers and floats)
-NUM <value>
+NUM <value>   # Can be any number (integer or float)
+123
+3.141516
 
-# The string can be in "<str>" or (str)
-STR <value> 
+STR (<value>) 
+"<value>"
 ```
 
-### Examples 
+### Examples
+
 ```
 ASSIGN BOOL 0 TO bool_var
 ASSIGN False TO bool_var_two
@@ -27,70 +41,137 @@ ASSIGN 3.1415 TO pi_two
 ASSIGN STR (Hello world) TO str_var
 ASSIGN "Hello world" TO str_var_two
 ```
-## Logical operations
-
-### Syntax
-```
-<value> EQ  <value>
-<value> GT <value>
-<value> LT <value>
-<value> GTE  <value>
-<value> LTE  <value>
-
-<value> AND <value>
-<value> OR <value>
-
-NOT <value>
-```
-
-### Examples
-```
-1 EQ 1 # -> Result: True
-2 GT 1 # -> Result: True
-2 LT 1 # -> Result: False
-
-True AND False # -> Result: False
-True OR False # -> Result: True
-NOT False # -> Result: True
-
-(1 EQ 1) AND (2 NOT EQ  2) # -> Result: False
-2 GT 1 OR 2 LT 1
-```
 
 ## Variables
 
+Variables are used to store and reference values.
+
 ### Syntax
+
 ```
-ASSIGN <value> TO <var-name>
+ASSIGN <value> TO <variable-name>
 ```
 
 ### Examples
-```
-ASSIGN 3.14 TO pi # -> Result: 3.14
-
-ASSIGN (ADD pi 2) to pi_plus_two # -> Result: 5.14
-ASSIGN (pi GT 5) to pi_gt_five # -> Result: False
-```
-
-
-## MACROS
-A macro is like a built-in function but with other syntax
 
 ```
-# Read a line in console
-# TYPE -> Expected value type - default is STR
-# prompt -> Message to show before reading - default is empty string
-READ <?TYPE> <?prompt>
+ASSIGN 3.14 TO pi                  # Assigns the value 3.14 to the variable 'pi'
+ASSIGN (ADD pi 2) TO pi_plus_two   # Assigns the result of the expression to 'pi_plus_two'
+ASSIGN (pi GT 5) TO is_pi_gt_five     # Assigns the result of the comparison to 'pi_gt_five'
+```
 
-# Print in console
-# value -> Can be variable, primitive value or expression
-PRINT <value>
+## Logical Operations
 
-# Operate the first with the second value
-ADD <value> <value>
-SUB <value> <value>
-MUL <value> <value>
+Modern Basic provides a set of logical operators for comparisons and boolean logic.
 
-# first value is divided by the second value
-DIV <value> <value>
+### Syntax
+
+```
+<value> EQ  <value>  # Equal
+<value> GT  <value>  # Greater than
+<value> LT  <value>  # Less than
+<value> GTE <value>  # Greater than or equal to
+<value> LTE <value>  # Less than or equal to
+
+<value> AND <value>  # Logical AND
+<value> OR  <value>  # Logical OR
+
+NOT <value>        # Logical NOT
+```
+
+### Examples
+
+```
+1 EQ 1       # -> Result: True
+2 GT 1       # -> Result: True
+2 LT 1       # -> Result: False
+
+True AND False # -> Result: False
+True OR False  # -> Result: True
+NOT False      # -> Result: True
+
+(1 EQ 1) AND (2 NEQ 2) # -> Result: False
+(2 GT 1) OR (2 LT 1)   # -> Result: True
+```
+
+## Macros
+
+Macros are built-in functions that provide additional functionality. By default, if a macro needs to store a value, it will use the stack.
+
+### `READ`
+
+Reads a line from the console.
+
+*   **`TYPE`:** The expected data type of the input (default is `STR`).
+*   **`prompt`:** A message to display before reading the input (default is an empty string).
+
+**Syntax:** `READ <?TYPE> <?prompt>`
+
+### `PRINT`
+
+Prints a value to the console.
+
+*   **`value`:** Can be a variable, a primitive value, or an expression.
+
+**Syntax:** `PRINT <value>`
+
+### Arithmetic Macros
+
+*   `ADD <value> <value>`: Adds two values.
+*   `SUB <value> <value>`: Subtracts the second value from the first.
+*   `MUL <value> <value>`: Multiplies two values.
+*   `DIV <value> <value>`: Divides the first value by the second.
+
+## Conditional Statements (`IF`)
+
+Executes a block of code if a condition is true.
+
+### Syntax
+
+```
+IF <condition> THEN:
+    # Code to execute if the condition is true
+END
+```
+
+### Example
+
+```
+READ "What is your age?"
+
+ASSIGN S.0 TO user_age
+
+IF (user_age GT 18) THEN:
+    PRINT "You are an adult."
+END
+
+IF (user_age LT 18) THEN:
+    PRINT "You are a minor."
+END
+```
+
+## Control Flow (`JUMP` and `SECTION`)
+
+Transfers control to a different part of the program.
+
+### Syntax
+
+```
+JUMP <section-name> IF <condition>
+
+SECTION <section-name>:
+    # Code block
+END
+```
+
+### Example
+
+```
+ASSIGN True TO is_new_user
+
+JUMP SAY_HI IF (is_new_user)
+
+SECTION SAY_HI:
+    PRINT "Hello World"
+END
 ```

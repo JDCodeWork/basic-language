@@ -1,0 +1,4 @@
+ASSIGN 3.14 TO pi # -> Result: 3.14
+
+ASSIGN (ADD pi 2) TO pi_plus_two # -> Result: 5.14
+ASSIGN (pi GT 5) TO pi_gt_five # -> Result: False

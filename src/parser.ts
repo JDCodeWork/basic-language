@@ -1,5 +1,7 @@
 import type { RawToken } from "./scanner";
-import { AndToken, BoolToken, CloseRoundBracketToken, EqualityToken, GreaterThanToken, LessThanToken, NotToken, NumToken, OpenRoundBracketToken, OrToken, StrToken, type IToken } from "./tokens";
+import { AndToken, BoolToken, CloseRoundBracketToken, EqualityToken, GreaterThanToken, IdentifierToken, LessThanToken, NotToken, NumToken, OpenRoundBracketToken, OrToken, StrToken, VarToken, type IToken } from "./tokens";
+
+const IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/
 
 export class Parser {
   private tokens: IToken<any>[] = []
@@ -54,36 +56,13 @@ export class Parser {
         this.consume()
         this.tokens.push(new OrToken(this.currTok().line, this.currTok().column))
         break;
+      case "ASSIGN":
+      case "TO":
+        this.tokens.push(new VarToken(this.currTok().value, this.currTok().line, this.currTok().column))
+        this.consume()
+        break;
       default:
-        const currTokVal = this.currTok().value
-
-        if (currTokVal.startsWith('"')) {
-          this.parseStr()
-        } else if (!isNaN(Number(currTokVal))) {
-          this.parseNum()
-        } else if (currTokVal.startsWith('(')) {
-          this.tokens.push(new OpenRoundBracketToken(this.currTok().line, this.currTok().column))
-          this.consume()
-
-          const rest = currTokVal.split('').slice(1)
-
-          if (rest.length >= 1) {
-            const rawToken = { column: this.col, line: this.currTok().line, value: rest.join() }
-            this.rawTokens.splice(this.col, 0, rawToken)
-          }
-        } else if (currTokVal.endsWith(')')) {
-          const rest = currTokVal.split('').slice(0, -1)
-
-          if (rest.length >= 1) {
-            const rawToken = { column: this.col, line: this.currTok().line, value: rest.join() }
-            this.rawTokens.splice(this.col, 0, rawToken)
-            this.parseToken()
-          }
-
-          this.tokens.push(new CloseRoundBracketToken(this.currTok().line, this.currTok().column))
-          this.consume()
-        } else this.consume()
-
+        this.splitRawTokens()
         break;
     }
   }
@@ -173,12 +152,46 @@ export class Parser {
     this.tokens.push(token)
   }
 
-  private next() {
-    return this.rawTokens[this.col + 1]
+  private splitRawTokens() {
+    const currTokVal = this.currTok().value
+
+    if (currTokVal.startsWith('"')) { // Modern Strings
+      this.parseStr()
+    } else if (!isNaN(Number(currTokVal))) { // Modern Numbers
+      this.parseNum()
+    } else if (currTokVal.startsWith('(')) { // Start Group expression
+      this.splitOpenRoundBracket()
+    } else if (currTokVal.endsWith(')')) { // End Group expression
+      this.splitCloseRoundBracket()
+    } else if (IDENTIFIER_REGEX.test(currTokVal)) { // Any identifier
+      this.tokens.push(new IdentifierToken(currTokVal, this.currTok().line, this.currTok().column))
+      this.consume()
+    } else this.consume() // Unknown Tokens
   }
 
-  private prev() {
-    return this.rawTokens[this.col + 1]
+  private splitOpenRoundBracket() {
+    this.tokens.push(new OpenRoundBracketToken(this.currTok().line, this.currTok().column))
+
+    const rest = this.currTok().value.split('').slice(1)
+    this.consume()
+
+    if (rest.length > 0) {
+      const rawToken = { column: this.col, line: this.currTok().line, value: rest.join('') }
+      this.rawTokens.splice(this.col, 0, rawToken)
+    }
+  }
+
+  private splitCloseRoundBracket() {
+    const rest = this.currTok().value.split('').slice(0, -1)
+
+    if (rest.length > 0) {
+      const rawToken = { column: this.col, line: this.currTok().line, value: rest.join() }
+      this.rawTokens.splice(this.col, 0, rawToken)
+      this.parseToken()
+    }
+
+    this.tokens.push(new CloseRoundBracketToken(this.currTok().line, this.currTok().column))
+    this.consume()
   }
 
   private consume() {
@@ -193,3 +206,4 @@ export class Parser {
     return this.col >= this.rawTokens.length
   }
 }
+

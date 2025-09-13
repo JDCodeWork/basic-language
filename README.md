@@ -68,7 +68,7 @@ ASSIGN <value> TO <var-name>
 ```
 ASSIGN 3.14 TO pi # -> Result: 3.14
 
-ASSIGN (ADD pi, 2) to pi_plus_two # -> Result: 5.14
+ASSIGN (ADD pi 2) to pi_plus_two # -> Result: 5.14
 ASSIGN (pi GT 5) to pi_gt_five # -> Result: False
 ```
 
@@ -87,10 +87,10 @@ READ <?TYPE> <?prompt>
 PRINT <value>
 
 # Operate the first with the second value
-ADD <value>, <value>
-SUB <value>, <value>
-MUL <value>, <value>
+ADD <value> <value>
+SUB <value> <value>
+MUL <value> <value>
 
 # first value is divided by the second value
-DIV <value>, <value>
+DIV <value> <value>
 ```

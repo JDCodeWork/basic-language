@@ -141,3 +141,10 @@ export class CloseRoundBracketToken extends TokenBase<string> {
     }
 }
 
+export class VarToken extends TokenBase<any> {
+    public type = 'VAR'
+}
+
+export class IdentifierToken extends TokenBase<string> {
+    public type = 'IDENT'
+}

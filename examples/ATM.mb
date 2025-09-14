@@ -1,0 +1,44 @@
+# User currency
+READ NUM AND PRINT "What is your current balance?: "
+ASSIGN RO TO current_balance
+
+# ATM menu and user choice
+PRINT
+PRINT "ATM MENU"
+PRINT "1. Withdraw money"
+PRINT "2. Deposit money"
+PRINT "3. Exit"
+READ NUM AND PRINT "Choose an option: "
+ASSIGN RO TO user_choice
+
+IF ( user_choice EQ 3 ) THEN:
+    EXIT
+END
+
+JUMP withdraw IF ( user_choice EQ 1 )
+JUMP deposit IF ( user_choice EQ 2 )
+
+SECTION withdraw:
+    READ NUM AND PRINT "How much money do you want to withdraw?: "
+    ASSIGN RO to withdraw_amount
+
+    IF ( withdraw_amount GT current_balance ) THEN:
+        PRINT "Insufficient funds"
+        EXIT
+    END
+
+    ASSIGN ( SUB current_balance withdraw_amount ) TO current_balance
+
+    PRINT "New balance: " current_balance
+    EXIT
+END
+
+SECTION deposit:
+    READ NUM AND PRINT "How much money do you want to deposit?: "
+    ASSIGN RO TO deposit_amount
+
+    ASSIGN ( ADD current_balance deposit_amount ) TO current_balance
+
+    PRINT "New balance: " current_balance
+    EXIT
+END

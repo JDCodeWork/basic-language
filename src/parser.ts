@@ -1,5 +1,5 @@
 import type { RawToken } from "./scanner";
-import { AndToken, BoolToken, CloseRoundBracketToken, EqualityToken, GreaterThanToken, IdentifierToken, LessThanToken, NotToken, NumToken, OpenRoundBracketToken, OrToken, StrToken, VarToken, type IToken } from "./tokens";
+import { AndToken, BoolToken, RightParen, EndToken, EqualityToken, GreaterThanToken, IdentifierToken, IfToken, JumpToken, LessThanToken, MacroToken, NotToken, NumToken, LeftParen, OrToken, SectionToken, StrToken, VarToken, type IToken } from "./tokens";
 
 const IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/
 
@@ -30,7 +30,10 @@ export class Parser {
         this.parsePrimitiveStr()
         break;
       case "NUM":
-        this.parsePrimitiveNum()
+        if (isNaN(Number(this.nextTok().value))) {
+          this.consume()
+          this.tokens.push(new NumToken(null, this.currTok().line, this.currTok().column))
+        } else this.parsePrimitiveNum()
         break;
       case "EQ":
         this.consume()
@@ -60,6 +63,30 @@ export class Parser {
       case "TO":
         this.tokens.push(new VarToken(this.currTok().value, this.currTok().line, this.currTok().column))
         this.consume()
+        break;
+      case "READ":
+      case "PRINT":
+      case "ADD":
+      case "DIV":
+      case "MUL":
+      case "SUB":
+      case "EXIT":
+        this.tokens.push(new MacroToken(this.currTok().value, this.currTok().line, this.currTok().column))
+        this.consume()
+        break;
+      case "IF":
+        this.tokens.push(new IfToken(this.currTok().line, this.currTok().column))
+        this.consume()
+        break;
+      case "END":
+        this.tokens.push(new EndToken(this.currTok().line, this.currTok().column))
+        this.consume()
+        break;
+      case "JUMP":
+        this.parseJump()
+        break;
+      case "SECTION":
+        this.parseSection()
         break;
       default:
         this.splitRawTokens()
@@ -170,7 +197,7 @@ export class Parser {
   }
 
   private splitOpenRoundBracket() {
-    this.tokens.push(new OpenRoundBracketToken(this.currTok().line, this.currTok().column))
+    this.tokens.push(new LeftParen(this.currTok().line, this.currTok().column))
 
     const rest = this.currTok().value.split('').slice(1)
     this.consume()
@@ -185,12 +212,36 @@ export class Parser {
     const rest = this.currTok().value.split('').slice(0, -1)
 
     if (rest.length > 0) {
-      const rawToken = { column: this.col, line: this.currTok().line, value: rest.join() }
+      const rawToken = { column: this.col, line: this.currTok().line, value: rest.join('') }
       this.rawTokens.splice(this.col, 0, rawToken)
       this.parseToken()
     }
 
-    this.tokens.push(new CloseRoundBracketToken(this.currTok().line, this.currTok().column))
+    this.tokens.push(new RightParen(this.currTok().line, this.currTok().column))
+    this.consume()
+  }
+
+  private parseJump() {
+    const prevTok = this.consume()
+
+    if (!IDENTIFIER_REGEX.test(this.currTok().value)) {
+      throw new Error('SYNTAX', { cause: `Invalid jump label at ${this.currTok().line}:${this.currTok().column}.` })
+    }
+
+    this.tokens.push(new JumpToken(this.currTok().value, prevTok.line, prevTok.column))
+    this.consume()
+  }
+
+  private parseSection() {
+    const prevTok = this.consume()
+
+    const sectionLabel = this.currTok().value.split(':')[0]
+
+    if (!IDENTIFIER_REGEX.test(sectionLabel)) {
+      throw new Error('SYNTAX', { cause: `Invalid section label at ${this.currTok().line}:${this.currTok().column}.` })
+    }
+
+    this.tokens.push(new SectionToken(sectionLabel, prevTok.line, prevTok.column))
     this.consume()
   }
 
@@ -200,6 +251,10 @@ export class Parser {
 
   private currTok() {
     return this.rawTokens[this.col]
+  }
+
+  private nextTok() {
+    return this.rawTokens[this.col + 1]
   }
 
   private isAtEnd() {

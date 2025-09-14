@@ -1,0 +1,57 @@
+# Simple Calculator
+
+# Read the first number
+READ NUM AND PRINT "Enter the first number: "
+ASSIGN RO TO num1
+
+# Read the second number
+READ NUM AND PRINT "Enter the second number: "
+ASSIGN RO TO num2
+
+# Read the operation
+PRINT "Select an operation:"
+PRINT "1. Add"
+PRINT "2. Subtract"
+PRINT "3. Multiply"
+PRINT "4. Divide"
+READ NUM AND PRINT "Enter your choice (1-4): "
+ASSIGN RO TO choice
+
+# Perform the selected operation
+JUMP add_section IF (choice EQ 1)
+JUMP sub_section IF (choice EQ 2)
+JUMP mul_section IF (choice EQ 3)
+JUMP div_section IF (choice EQ 4)
+
+# Invalid choice
+PRINT "Invalid choice. Exiting."
+EXIT
+
+SECTION add_section:
+    ASSIGN (ADD num1 num2) TO result
+    PRINT "Result: " result
+    EXIT
+END
+
+SECTION sub_section:
+    ASSIGN (SUB num1 num2) TO result
+    PRINT "Result: " result
+    EXIT
+END
+
+SECTION mul_section:
+    ASSIGN (MUL num1 num2) TO result
+    PRINT "Result: " result
+    EXIT
+END
+
+SECTION div_section:
+    IF (num2 EQ 0) THEN:
+        PRINT "Error: Division by zero."
+        EXIT
+    END
+
+    ASSIGN (DIV num1 num2) TO result
+    PRINT "Result: " result
+    EXIT
+END

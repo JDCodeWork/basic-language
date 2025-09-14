@@ -115,6 +115,10 @@ Prints a value to the console.
 
 **Syntax:** `PRINT <value>`
 
+### `EXIT`
+
+Kill the program
+
 ### Arithmetic Macros
 
 *   `ADD <value> <value>`: Adds two values.
@@ -137,9 +141,9 @@ END
 ### Example
 
 ```
-READ "What is your age?"
+READ INT AND PRINT "What is your age?"
 
-ASSIGN S.0 TO user_age
+ASSIGN R0 TO user_age
 
 IF (user_age GT 18) THEN:
     PRINT "You are an adult."
@@ -169,9 +173,9 @@ END
 ```
 ASSIGN True TO is_new_user
 
-JUMP SAY_HI IF (is_new_user)
+JUMP say_hi IF (is_new_user)
 
-SECTION SAY_HI:
+SECTION say_hi:
     PRINT "Hello World"
 END
 ```

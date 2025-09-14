@@ -18,7 +18,7 @@ abstract class TokenBase<T> implements IToken<T> {
 
     toString(): string {
         const typeCol = this.type.padEnd(20);
-        const literalCol = String(this.literal).padStart(4).padEnd(20);
+        const literalCol = String(this.literal ?? "").padStart(4).padEnd(20);
         const lineCol = String(this.line).padStart(4);
         const colCol = String(this.column).padStart(2, '0');
 
@@ -30,7 +30,7 @@ export class StrToken extends TokenBase<string> {
     public type = 'STR'
 }
 
-export class NumToken extends TokenBase<number> {
+export class NumToken extends TokenBase<number | null> {
     public type = 'NUM'
 }
 
@@ -119,25 +119,25 @@ export class NotToken extends TokenBase<string> {
     }
 }
 
-export class OpenRoundBracketToken extends TokenBase<string> {
-    public type = 'OPEN_ROUND_BRACKET'
+export class LeftParen extends TokenBase<null> {
+    public type = 'LEFT_PAREN'
 
     constructor(
         line: number,
         column: number
     ) {
-        super('(', line, column)
+        super(null, line, column)
     }
 }
 
-export class CloseRoundBracketToken extends TokenBase<string> {
-    public type = 'CLOSE_ROUND_BRACKET'
+export class RightParen extends TokenBase<null> {
+    public type = 'RIGHT_PAREN'
 
     constructor(
         line: number,
         column: number
     ) {
-        super(')', line, column)
+        super(null, line, column)
     }
 }
 
@@ -147,4 +147,39 @@ export class VarToken extends TokenBase<any> {
 
 export class IdentifierToken extends TokenBase<string> {
     public type = 'IDENT'
+}
+
+export class MacroToken extends TokenBase<string> {
+    public type = 'MACRO'
+}
+
+export class JumpToken extends TokenBase<string> {
+    public type = 'JUMP'
+}
+
+// TODO
+export class SectionToken extends TokenBase<string> { 
+    public type = 'SECTION'
+}
+
+export class IfToken extends TokenBase<null> {
+    public type = 'IF'
+
+    constructor(
+        line: number,
+        column: number
+    ) {
+        super(null, line, column)
+    }
+}
+
+export class EndToken extends TokenBase<null> {
+    public type = 'END'
+
+    constructor(
+        line: number,
+        column: number
+    ) {
+        super(null, line, column)
+    }
 }

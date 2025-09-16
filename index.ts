@@ -1,3 +1,4 @@
+import { Interpreter } from "./src/interpreter"
 import { Parser } from "./src/parser"
 import { Scanner } from "./src/scanner"
 
@@ -21,10 +22,8 @@ async function main() {
         const rawTokens = new Scanner(fileSource).scan()
 
         const tokens = new Parser(rawTokens).parse()
+        new Interpreter(tokens).interpret()
 
-        for (const token of tokens) {
-            console.log(token.toString())
-        }
     } catch (error: any) {
         console.error(error.cause)
     }

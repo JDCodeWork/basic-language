@@ -105,7 +105,7 @@ export class Parser {
   private parseStr() {
     // Check correct syntax
     if (!this.currTok().value.startsWith('"')) {
-      throw new Error('SYNTAX', { cause: `Invalid string at ${this.currTok().line}:${this.currTok().column}. String must be start with: " ` })
+      throw new SyntaxError(`Invalid string at ${this.currTok().line}:${this.currTok().column}. String must be start with: " `)
     }
 
     let strValue = ''
@@ -141,7 +141,7 @@ export class Parser {
 
     // Check correct syntax
     if (!this.currTok().value.startsWith('(')) {
-      throw new Error('SYNTAX', { cause: `Invalid string at ${this.currTok().line}:${this.currTok().column}. String must be start with: (` })
+      throw new SyntaxError(`Invalid string at ${this.currTok().line}:${this.currTok().column}. String must be start with: (`)
     }
 
     let strValue = ''
@@ -171,7 +171,7 @@ export class Parser {
     const numVal = parseFloat(numToken.value)
 
     if (isNaN(numVal)) {
-      throw new Error('SYNTAX', { cause: `Invalid number at ${this.currTok().line}:${this.currTok().column}.` })
+      throw new SyntaxError(`Invalid number at ${this.currTok().line}:${this.currTok().column}.`)
     }
 
     const token = new NumToken(numVal, numToken.line, numToken.column)
@@ -225,7 +225,7 @@ export class Parser {
     const prevTok = this.consume()
 
     if (!IDENTIFIER_REGEX.test(this.currTok().value)) {
-      throw new Error('SYNTAX', { cause: `Invalid jump label at ${this.currTok().line}:${this.currTok().column}.` })
+      throw new SyntaxError(`Invalid jump label at ${this.currTok().line}:${this.currTok().column}.`)
     }
 
     this.tokens.push(new JumpToken(this.currTok().value, prevTok.line, prevTok.column))
@@ -238,7 +238,7 @@ export class Parser {
     const sectionLabel = this.currTok().value.split(':')[0]
 
     if (!IDENTIFIER_REGEX.test(sectionLabel)) {
-      throw new Error('SYNTAX', { cause: `Invalid section label at ${this.currTok().line}:${this.currTok().column}.` })
+      throw new SyntaxError(`Invalid section label at ${this.currTok().line}:${this.currTok().column}.`)
     }
 
     this.tokens.push(new SectionToken(sectionLabel, prevTok.line, prevTok.column))

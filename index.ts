@@ -25,7 +25,7 @@ async function main() {
         new Interpreter(tokens).interpret()
 
     } catch (error: any) {
-        console.error(error.cause)
+        console.error(`\n${error.message}Error: ${error.cause}`)
     }
 }
 

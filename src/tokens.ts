@@ -108,14 +108,14 @@ export class OrToken extends TokenBase<string> {
     }
 }
 
-export class NotToken extends TokenBase<string> {
+export class NotToken extends TokenBase<null> {
     public type = 'NOT'
 
     constructor(
         line: number,
         column: number
     ) {
-        super('NOT', line, column)
+        super(null, line, column)
     }
 }
 
@@ -158,7 +158,7 @@ export class JumpToken extends TokenBase<string> {
 }
 
 // TODO
-export class SectionToken extends TokenBase<string> { 
+export class SectionToken extends TokenBase<string> {
     public type = 'SECTION'
 }
 

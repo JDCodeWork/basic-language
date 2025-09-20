@@ -1,4 +1,4 @@
-import type { IToken } from "./tokens"
+import { type IToken } from "./tokens"
 import { RuntimeError, SemanticError } from "./utils"
 
 export class Interpreter {
@@ -51,15 +51,26 @@ export class Interpreter {
     private interpretEquality() {
         this.consume()
 
-        if (this.previous(2).type == "NUM" && this.peek().type == "NUM") {
-            const leftVal = this.stack.pop()
-            const rightVal = this.consume().literal
+        const leftVal = this.stack.pop()
+        let rightVal
 
+        if (this.current().type != "LEFT_PAREN") {
+            rightVal = this.consume().literal
+        } else {
+            while (this.current().type != "RIGHT_PAREN") {
+                this.interpretToken()
+            }
+
+            this.consume()
+            rightVal = this.stack.pop()
+        }
+
+        if (typeof rightVal != "undefined") {
             this.stack.push(leftVal == rightVal)
             return
         }
 
-        // throw new SemanticError(`The 'EQ' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        throw new SemanticError(`The 'EQ' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
     }
     private interpretGreaterThan() {
         this.consume()
@@ -73,7 +84,7 @@ export class Interpreter {
             return
         }
 
-        // throw new SemanticError(`The 'GT' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        throw new SemanticError(`The 'GT' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
     }
     private interpretLessThan() {
         this.consume()
@@ -87,31 +98,55 @@ export class Interpreter {
             return
         }
 
-        // throw new SemanticError(`The 'LT' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        throw new SemanticError(`The 'LT' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
     }
     private interpretAnd() {
         this.consume()
-        const leftVal = this.stack.pop()
-        const rightTok = this.consume()
 
-        if (typeof leftVal === "boolean" && rightTok.type == "BOOL") {
-            this.stack.push(leftVal && rightTok.literal)
+        const leftVal = this.stack.pop()
+        let rightVal
+
+        if (this.current().type == "BOOL") rightVal = this.consume().literal
+        if (this.current().type == "LEFT_PAREN") {
+            while (this.current().type != "RIGHT_PAREN") {
+                this.interpretToken()
+            }
+
+            this.consume()
+            rightVal = this.stack.pop()
+        }
+
+        if (typeof leftVal != "undefined" && typeof rightVal != "undefined") {
+            console.log(leftVal, rightVal)
+            console.log(leftVal && rightVal)
+            this.stack.push(leftVal && rightVal)
             return
         }
 
-        // throw new SemanticError(`The 'AND' operator cannot be used with different or incompatible types. Ensure both operands are of the same type. Error at ${this.previous().line}:${this.previous().column}`)
+        throw new SemanticError(`The 'AND' operator cannot be used with different or incompatible types. Ensure both operands are of the same type. Error at ${this.previous().line}:${this.previous().column}`)
     }
     private interpretOr() {
         this.consume()
         const leftVal = this.stack.pop()
-        const rightTok = this.consume()
+        let rightVal
 
-        if (typeof leftVal === "boolean" && rightTok.type == "BOOL") {
-            this.stack.push(leftVal || rightTok.literal)
+        if (this.current().type == "LEFT_PAREN") {
+            while (this.current().type != "RIGHT_PAREN") {
+                this.interpretToken()
+            }
+
+            this.consume()
+            rightVal = this.stack.pop()
+        } else {
+            rightVal = this.consume().literal
+        }
+
+        if (typeof leftVal === "boolean" && typeof rightVal == "boolean") {
+            this.stack.push(leftVal || rightVal)
             return
         }
 
-        // throw new SemanticError(`The 'OR' operator cannot be used with different or incompatible types. Ensure both operands are of the same type. Error at ${this.previous().line}:${this.previous().column}`)
+        throw new SemanticError(`The 'OR' operator cannot be used with different or incompatible types. Ensure both operands are of the same type. Error at ${this.previous().line}:${this.previous().column}`)
     }
 
     private interpretNot() {
@@ -123,7 +158,22 @@ export class Interpreter {
             return
         }
 
-        // throw new SemanticError(`The 'NOT' operator requires a single operand of a valid type. Ensure the operand is of the correct type. Error at ${this.previous().line}:${this.previous().column}`)
+        if (rightTok.type === "EQUALITY") return this.interpretNotEq()
+
+        throw new SemanticError(`The 'NOT' operator requires a single operand of a valid type. Ensure the operand is of the correct type. Error at ${this.previous().line}:${this.previous().column}`)
+    }
+
+    private interpretNotEq() {
+        const leftVal = this.stack.pop()
+
+        if (this.current().type == "BOOL" || this.current().type == "NUM") {
+            const rightVal = this.consume().literal
+
+            this.stack.push(leftVal != rightVal)
+            return
+        }
+
+        throw new SemanticError(`The 'NOT EQ' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
     }
 
     private consume() {

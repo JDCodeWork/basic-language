@@ -3,7 +3,7 @@ import { RuntimeError, SemanticError } from "./utils"
 
 export class Interpreter {
     private pc: number = 0
-    private stack = new Stack(256)
+    private stack = new Stack(32)
 
     constructor(
         private tokens: IToken<any>[]
@@ -14,7 +14,7 @@ export class Interpreter {
             this.interpretToken()
         }
 
-        console.log(this.stack)
+        console.log(this.stack.toString())
     }
 
     private interpretToken() {
@@ -43,142 +43,123 @@ export class Interpreter {
                 this.interpretNot()
                 break;
             default:
-                this.consume()
+                this.consume() // Ignore other tokens for now
                 break;
         }
     }
 
     private interpretEquality() {
-        this.consume()
+        this.consume() // Consume 'EQUALITY' token
 
         const leftVal = this.stack.pop()
-        let rightVal
+        const rightVal = this.evaluateExpression()
 
-        if (this.current().type != "LEFT_PAREN") {
-            rightVal = this.consume().literal
-        } else {
-            while (this.current().type != "RIGHT_PAREN") {
-                this.interpretToken()
-            }
-
-            this.consume()
-            rightVal = this.stack.pop()
+        if (typeof leftVal !== typeof rightVal) {
+            throw new SemanticError(`Cannot compare values of different types: '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        if (typeof rightVal != "undefined") {
-            this.stack.push(leftVal == rightVal)
-            return
-        }
-
-        throw new SemanticError(`The 'EQ' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(leftVal == rightVal)
     }
+
     private interpretGreaterThan() {
-        this.consume()
+        this.consume() // Consume 'GREATER_THAN' token
 
         const leftVal = this.stack.pop()
+        const rightVal = this.evaluateExpression()
 
-        if (this.current().type == "NUM") {
-            const rightVal = this.consume().literal
-
-            this.stack.push(leftVal >= rightVal)
-            return
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'GT' can only be applied to numbers, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        throw new SemanticError(`The 'GT' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(leftVal > rightVal)
     }
+
     private interpretLessThan() {
-        this.consume()
+        this.consume() // Consume 'LESS_THAN' token
 
         const leftVal = this.stack.pop()
+        const rightVal = this.evaluateExpression()
 
-        if (this.current().type == "NUM") {
-            const rightVal = this.consume().literal
-
-            this.stack.push(leftVal <= rightVal)
-            return
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'LT' can only be applied to numbers, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        throw new SemanticError(`The 'LT' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(leftVal < rightVal)
     }
+
     private interpretAnd() {
-        this.consume()
+        this.consume() // Consume 'AND' token
 
         const leftVal = this.stack.pop()
-        let rightVal
+        const rightVal = this.evaluateExpression()
 
-        if (this.current().type == "BOOL") rightVal = this.consume().literal
-        if (this.current().type == "LEFT_PAREN") {
-            while (this.current().type != "RIGHT_PAREN") {
-                this.interpretToken()
-            }
-
-            this.consume()
-            rightVal = this.stack.pop()
+        if (typeof leftVal !== 'boolean' || typeof rightVal !== 'boolean') {
+            throw new SemanticError(`Logical AND operator can only be applied to booleans, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        if (typeof leftVal != "undefined" && typeof rightVal != "undefined") {
-            console.log(leftVal, rightVal)
-            console.log(leftVal && rightVal)
-            this.stack.push(leftVal && rightVal)
-            return
-        }
-
-        throw new SemanticError(`The 'AND' operator cannot be used with different or incompatible types. Ensure both operands are of the same type. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(leftVal && rightVal)
     }
+
     private interpretOr() {
-        this.consume()
+        this.consume() // Consume 'OR' token
         const leftVal = this.stack.pop()
-        let rightVal
+        const rightVal = this.evaluateExpression()
 
-        if (this.current().type == "LEFT_PAREN") {
-            while (this.current().type != "RIGHT_PAREN") {
-                this.interpretToken()
-            }
-
-            this.consume()
-            rightVal = this.stack.pop()
-        } else {
-            rightVal = this.consume().literal
+        if (typeof leftVal !== 'boolean' || typeof rightVal !== 'boolean') {
+            throw new SemanticError(`Logical OR operator can only be applied to booleans, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        if (typeof leftVal === "boolean" && typeof rightVal == "boolean") {
-            this.stack.push(leftVal || rightVal)
-            return
-        }
-
-        throw new SemanticError(`The 'OR' operator cannot be used with different or incompatible types. Ensure both operands are of the same type. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(leftVal || rightVal)
     }
 
     private interpretNot() {
-        this.consume()
-        const rightTok = this.consume()
-
-        if (rightTok.type === "BOOL") {
-            this.stack.push(!rightTok.literal)
-            return
+        this.consume() // Consume 'NOT' token
+        
+        if (this.current().type === "EQUALITY") {
+            return this.interpretNotEq()
+        }
+        
+        const rightVal = this.evaluateExpression()
+        
+        if (typeof rightVal !== 'boolean') {
+            throw new SemanticError(`Logical NOT operator can only be applied to booleans, but got '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        if (rightTok.type === "EQUALITY") return this.interpretNotEq()
-
-        throw new SemanticError(`The 'NOT' operator requires a single operand of a valid type. Ensure the operand is of the correct type. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(!rightVal)
     }
 
     private interpretNotEq() {
+        this.consume(); // consume 'EQUALITY'
         const leftVal = this.stack.pop()
+        const rightVal = this.evaluateExpression()
 
-        if (this.current().type == "BOOL" || this.current().type == "NUM") {
-            const rightVal = this.consume().literal
-
-            this.stack.push(leftVal != rightVal)
-            return
+        if (typeof leftVal !== typeof rightVal) {
+            throw new SemanticError(`Cannot compare values of different types for inequality: '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
-        throw new SemanticError(`The 'NOT EQ' operator cannot be used to compare values of different or incompatible types. Error at ${this.previous().line}:${this.previous().column}`)
+        this.stack.push(leftVal != rightVal)
+    }
+
+    private evaluateExpression() {
+        if (this.current().type != "LEFT_PAREN") {
+            return this.consume().literal
+        } else {
+            this.consume() // consume LEFT_PAREN
+            while (this.current().type != "RIGHT_PAREN") {
+                if(this.isAtEnd()) {
+                    throw new RuntimeError("Unmatched parenthesis. Unexpected end of input.")
+                }
+                this.interpretToken()
+            }
+
+            this.consume() // consume RIGHT_PAREN
+            return this.stack.pop()
+        }
     }
 
     private consume() {
         if (this.isAtEnd()) {
-            throw new RuntimeError("Unexpected end of input")
+            throw new RuntimeError("Unexpected end of input.")
         }
 
         return this.tokens[this.pc++]
@@ -188,16 +169,12 @@ export class Interpreter {
         return this.tokens[this.pc]
     }
 
-    private peek(amount = 1) {
-        return this.tokens[this.pc + amount]
-    }
-
     private previous(amount = 1) {
         return this.tokens[this.pc - amount]
     }
 
     private isAtEnd() {
-        return this.pc >= this.tokens.length
+        return this.pc >= this.tokens.length;
     }
 }
 
@@ -208,7 +185,7 @@ class Stack {
 
     push(value: any) {
         if (this.stack.length >= this.size) {
-            throw new Error("Stack overflow")
+            throw new RuntimeError("Stack overflow: Maximum stack size of " + this.size + " exceeded.")
         }
 
         this.stack.push(value)
@@ -216,7 +193,7 @@ class Stack {
 
     pop() {
         if (this.stack.length === 0) {
-            throw new Error("Stack underflow")
+            throw new RuntimeError("Stack underflow: Cannot pop from an empty stack.")
         }
 
         return this.stack.pop()
@@ -224,9 +201,24 @@ class Stack {
 
     shift() {
         if (this.stack.length === 0) {
-            throw new RuntimeError("Stack underflow")
+            throw new RuntimeError("Stack underflow: Cannot shift from an empty stack.")
         }
 
         return this.stack.shift()
+    }
+
+    toString() {
+        let str = 'Stack (Top to Bottom):\n['
+
+        if(this.stack.length === 0){
+            str += '\n    (empty)\n'
+        } else {
+            for (let i = this.stack.length - 1; i >= 0; i--) {
+                str += `\n    ${i}: ${JSON.stringify(this.stack[i])} `
+            }
+        }
+
+        str += '\n] Size: ' + this.stack.length + ' / ' + this.size + ''
+        return str
     }
 }

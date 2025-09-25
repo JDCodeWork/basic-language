@@ -1,0 +1,8 @@
+READ NUM "Ingresa el numero A:"
+ASSIGN SL TO num_a
+
+READ NUM "Ingresa el numero B:"
+ASSIGN SL TO num_b
+
+ASSIGN (ADD num_a num_b) TO sum
+PRINT STR (La suma es: ) sum 

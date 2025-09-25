@@ -1,9 +1,11 @@
+import { isConstructorDeclaration } from "typescript"
 import { type IToken } from "./tokens"
 import { RuntimeError, SemanticError } from "./utils"
 
 export class Interpreter {
     private pc: number = 0
     private stack = new Stack(32)
+    private variables: Record<string, any> = {}
 
     constructor(
         private tokens: IToken<any>[]
@@ -13,8 +15,6 @@ export class Interpreter {
         while (!this.isAtEnd()) {
             this.interpretToken()
         }
-
-        console.log(this.stack.toString())
     }
 
     private interpretToken() {
@@ -27,11 +27,17 @@ export class Interpreter {
             case "EQUALITY":
                 this.interpretEquality()
                 break;
-            case "GREATER_THAN":
-                this.interpretGreaterThan()
+            case "GREATER":
+                this.interpretGreater()
                 break;
-            case "LESS_THAN":
-                this.interpretLessThan()
+            case "LESS":
+                this.interpretLess()
+                break;
+            case "GREATER_EQUAL":
+                this.interpretGreaterEqual()
+                break;
+            case "LESS_EQUAL":
+                this.interpretLessEqual()
                 break;
             case "AND":
                 this.interpretAnd()
@@ -42,6 +48,12 @@ export class Interpreter {
             case "NOT":
                 this.interpretNot()
                 break;
+            case "MACRO":
+                this.interpretMacro()
+                break;
+            case "VAR":
+                this.interpretVar()
+                break;
             default:
                 this.consume() // Ignore other tokens for now
                 break;
@@ -51,8 +63,7 @@ export class Interpreter {
     private interpretEquality() {
         this.consume() // Consume 'EQUALITY' token
 
-        const leftVal = this.stack.pop()
-        const rightVal = this.evaluateExpression()
+        const { leftVal, rightVal } = this.getBinaryValues()
 
         if (typeof leftVal !== typeof rightVal) {
             throw new SemanticError(`Cannot compare values of different types: '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
@@ -61,11 +72,10 @@ export class Interpreter {
         this.stack.push(leftVal == rightVal)
     }
 
-    private interpretGreaterThan() {
-        this.consume() // Consume 'GREATER_THAN' token
+    private interpretGreater() {
+        this.consume() // Consume 'GREATER' token
 
-        const leftVal = this.stack.pop()
-        const rightVal = this.evaluateExpression()
+        const { leftVal, rightVal } = this.getBinaryValues()
 
         if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
             throw new SemanticError(`Operator 'GT' can only be applied to numbers, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
@@ -74,11 +84,22 @@ export class Interpreter {
         this.stack.push(leftVal > rightVal)
     }
 
-    private interpretLessThan() {
-        this.consume() // Consume 'LESS_THAN' token
+    private interpretGreaterEqual() {
+        this.consume() // Consume 'GREATER_EQUAL' token
 
-        const leftVal = this.stack.pop()
-        const rightVal = this.evaluateExpression()
+        const { leftVal, rightVal } = this.getBinaryValues()
+
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'GTE' can only be applied to numbers, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
+        }
+
+        this.stack.push(leftVal >= rightVal)
+    }
+
+    private interpretLess() {
+        this.consume() // Consume 'LESS' token
+
+        const { leftVal, rightVal } = this.getBinaryValues()
 
         if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
             throw new SemanticError(`Operator 'LT' can only be applied to numbers, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
@@ -87,14 +108,29 @@ export class Interpreter {
         this.stack.push(leftVal < rightVal)
     }
 
+    private interpretLessEqual() {
+        this.consume() // Consume 'LESS_EQUAL' token
+
+        const { leftVal, rightVal } = this.getBinaryValues()
+
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'LTE' can only be applied to numbers, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
+        }
+
+        this.stack.push(leftVal <= rightVal)
+    }
+
     private interpretAnd() {
         this.consume() // Consume 'AND' token
 
-        const leftVal = this.stack.pop()
-        const rightVal = this.evaluateExpression()
+        if (this.current().type == "MACRO" && this.current().literal == "PRINT") {
+            return;
+        }
+
+        const { leftVal, rightVal } = this.getBinaryValues()
 
         if (typeof leftVal !== 'boolean' || typeof rightVal !== 'boolean') {
-            throw new SemanticError(`Logical AND operator can only be applied to booleans, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
+            throw new SemanticError(`Logical 'AND' operator can only be applied to booleans, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
         this.stack.push(leftVal && rightVal)
@@ -102,11 +138,11 @@ export class Interpreter {
 
     private interpretOr() {
         this.consume() // Consume 'OR' token
-        const leftVal = this.stack.pop()
-        const rightVal = this.evaluateExpression()
+
+        const { leftVal, rightVal } = this.getBinaryValues()
 
         if (typeof leftVal !== 'boolean' || typeof rightVal !== 'boolean') {
-            throw new SemanticError(`Logical OR operator can only be applied to booleans, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
+            throw new SemanticError(`Logical 'OR' operator can only be applied to booleans, but got '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
         this.stack.push(leftVal || rightVal)
@@ -114,15 +150,17 @@ export class Interpreter {
 
     private interpretNot() {
         this.consume() // Consume 'NOT' token
-        
+
         if (this.current().type === "EQUALITY") {
             return this.interpretNotEq()
         }
-        
-        const rightVal = this.evaluateExpression()
-        
+
+        let rightVal
+        if (this.current().type == "IDENT") rightVal = this.variables[this.current().literal]
+        else rightVal = this.evaluateExpression()
+
         if (typeof rightVal !== 'boolean') {
-            throw new SemanticError(`Logical NOT operator can only be applied to booleans, but got '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
+            throw new SemanticError(`Logical 'NOT' operator can only be applied to booleans, but got '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
         }
 
         this.stack.push(!rightVal)
@@ -130,8 +168,8 @@ export class Interpreter {
 
     private interpretNotEq() {
         this.consume(); // consume 'EQUALITY'
-        const leftVal = this.stack.pop()
-        const rightVal = this.evaluateExpression()
+
+        const { leftVal, rightVal } = this.getBinaryValues()
 
         if (typeof leftVal !== typeof rightVal) {
             throw new SemanticError(`Cannot compare values of different types for inequality: '${typeof leftVal}' and '${typeof rightVal}'. Error at ${this.previous().line}:${this.previous().column}`);
@@ -140,21 +178,200 @@ export class Interpreter {
         this.stack.push(leftVal != rightVal)
     }
 
-    private evaluateExpression() {
-        if (this.current().type != "LEFT_PAREN") {
-            return this.consume().literal
-        } else {
-            this.consume() // consume LEFT_PAREN
-            while (this.current().type != "RIGHT_PAREN") {
-                if(this.isAtEnd()) {
-                    throw new RuntimeError("Unmatched parenthesis. Unexpected end of input.")
-                }
-                this.interpretToken()
-            }
+    private interpretVar() {
+        const varAssignTok = this.consume()
 
-            this.consume() // consume RIGHT_PAREN
+        if (varAssignTok.literal != "ASSIGN") {
+            throw new SyntaxError(`Expected 'ASSIGN' before variable name, but got '${varAssignTok.type}'. Error at ${varAssignTok.line}:${varAssignTok.column}`);
+        }
+
+        const value = this.evaluateValue()
+
+        const varToTok = this.consume()
+        if (varToTok.type != "VAR" || varToTok.literal != "TO") {
+            throw new SyntaxError(`Expected 'TO' after variable name, but got '${varToTok.type}'. Error at ${varToTok.line}:${varToTok.column}`);
+        }
+
+        const varNameTok = this.consume()
+        if (varNameTok.type != "IDENT") {
+            throw new SyntaxError(`Expected variable name, but got '${varNameTok.type}'. Error at ${varNameTok.line}:${varNameTok.column}`);
+        }
+
+        this.variables[varNameTok.literal] = value
+    }
+
+    private interpretMacro() {
+        switch (this.current().literal) {
+            case "ADD":
+                this.interpretAddMarco()
+                break;
+            case "SUB":
+                this.interpretSubMacro()
+                break;
+            case "MUL":
+                this.interpretMulMacro()
+                break;
+            case "DIV":
+                this.interpretDivMacro()
+                break;
+            case "READ":
+                this.interpretReadMacro()
+                break;
+            case "PRINT":
+                this.interpretPrintMacro()
+                break;
+            default:
+                this.consume()
+                break;
+        }
+    }
+
+    private interpretAddMarco() {
+        const addTok = this.consume()
+
+        let leftVal = this.evaluateValue()
+        const rightVal = this.evaluateValue()
+
+        this.stack.push(leftVal + rightVal)
+    }
+
+    private interpretSubMacro() {
+        this.consume()
+
+        const leftVal = this.evaluateValue()
+        const rightVal = this.evaluateValue()
+
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'ADD' can only be applied to numbers, but got '${typeof leftVal.literal}' and '${typeof rightVal.literal}'. Error at ${this.previous().line}:${this.previous().column}`);
+        }
+
+        this.stack.push(leftVal - rightVal)
+    }
+
+    private interpretMulMacro() {
+        this.consume()
+
+        const leftVal = this.evaluateValue()
+        const rightVal = this.evaluateValue()
+
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'ADD' can only be applied to numbers, but got '${typeof leftVal.literal}' and '${typeof rightVal.literal}'. Error at ${this.previous().line}:${this.previous().column}`);
+        }
+
+        this.stack.push(leftVal * rightVal)
+    }
+
+    private interpretDivMacro() {
+        this.consume()
+
+        const leftVal = this.evaluateValue()
+        const rightVal = this.evaluateValue()
+
+        if (typeof leftVal !== 'number' || typeof rightVal !== 'number') {
+            throw new SemanticError(`Operator 'ADD' can only be applied to numbers, but got '${typeof leftVal.literal}' and '${typeof rightVal.literal}'. Error at ${this.previous().line}:${this.previous().column}`);
+        }
+
+        this.stack.push(leftVal / rightVal)
+    }
+
+    private interpretReadMacro() {
+        this.consume()
+
+        let castType = "STR"
+        if (this.current().literal == null && (this.current().type == "STR" || this.current().type == "NUM" || this.current().type == "BOOL")) {
+            castType = this.current().type
+            this.consume()
+        }
+
+        let promptText = ""
+        if (this.current().type == "STR") {
+            promptText = this.consume().literal
+        }
+
+        const val = prompt(promptText)
+        switch (castType) {
+            case "STR":
+                this.stack.push(val)
+                break;
+            case "NUM":
+                this.stack.push(Number(val))
+                break;
+            case "BOOL":
+                this.stack.push(val == "True" ? true : false)
+                break;
+            default:
+                this.stack.push(null)
+                break;
+        }
+    }
+
+    private interpretPrintMacro() {
+        this.consume()
+
+        let printText = ""
+        while (this.current() && this.current().line == this.previous().line) {
+            printText += this.evaluateValue()
+        }
+
+        console.log(printText)
+    }
+
+    private evaluateValue() {
+        const tokType = this.current().type
+
+        if (tokType == "MACRO") {
+            this.interpretMacro()
+
             return this.stack.pop()
         }
+
+        if (tokType == "LEFT_PAREN") {
+            return this.evaluateExpression()
+        }
+
+        if (tokType != "IDENT") return this.consume().literal
+
+        const varName = String(this.consume().literal)
+        if (varName.length != 2 && !varName.startsWith('S')) {
+            return this.variables[varName]
+        }
+
+        switch (varName[1]) {
+            case "F":
+                return this.stack.shift()
+            case "L":
+                return this.stack.pop()
+            default:
+                throw new SemanticError(`Invalid stack operation: '${varName}'. Error at ${this.previous().line}:${this.previous().column}`);
+        }
+    }
+
+    private evaluateExpression() {
+        if (this.current().type != "LEFT_PAREN")
+            return this.consume().literal
+
+        this.consume() // consume LEFT_PAREN
+        while (this.current().type != "RIGHT_PAREN") {
+            if (this.isAtEnd()) {
+                throw new RuntimeError("Unmatched parenthesis. Unexpected end of input.")
+            }
+            this.interpretToken()
+        }
+
+        this.consume() // consume RIGHT_PAREN
+        return this.stack.pop()
+    }
+
+    private getBinaryValues() {
+        let leftVal
+        if (this.previous(2).type == "IDENT") leftVal = this.variables[this.previous(2).literal]
+        else leftVal = this.stack.pop()
+
+        let rightVal
+        if (this.current().type == "IDENT") rightVal = this.variables[this.current().literal]
+        else rightVal = this.evaluateExpression()
+
+        return { leftVal, rightVal }
     }
 
     private consume() {
@@ -171,6 +388,10 @@ export class Interpreter {
 
     private previous(amount = 1) {
         return this.tokens[this.pc - amount]
+    }
+
+    private next(amount = 1) {
+        return this.tokens[this.pc + amount]
     }
 
     private isAtEnd() {
@@ -210,7 +431,7 @@ class Stack {
     toString() {
         let str = 'Stack (Top to Bottom):\n['
 
-        if(this.stack.length === 0){
+        if (this.stack.length === 0) {
             str += '\n    (empty)\n'
         } else {
             for (let i = this.stack.length - 1; i >= 0; i--) {

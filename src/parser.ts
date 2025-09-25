@@ -1,5 +1,5 @@
 import type { RawToken } from "./scanner";
-import { AndToken, BoolToken, RightParen, EndToken, EqualityToken, GreaterThanToken, IdentifierToken, IfToken, JumpToken, LessThanToken, MacroToken, NotToken, NumToken, LeftParen, OrToken, SectionToken, StrToken, VarToken, type IToken } from "./tokens";
+import { AndToken, BoolToken, RightParen, EndToken, EqualityToken, GreaterToken, IdentifierToken, IfToken, JumpToken, LessToken, MacroToken, NotToken, NumToken, LeftParen, OrToken, SectionToken, StrToken, VarToken, type IToken, GreaterEqual as GreaterEqualToken, LessEqual as LessEqualToken } from "./tokens";
 
 const IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/
 
@@ -41,11 +41,19 @@ export class Parser {
         break;
       case "GT":
         this.consume()
-        this.tokens.push(new GreaterThanToken(this.currTok().line, this.currTok().column))
+        this.tokens.push(new GreaterToken(this.currTok().line, this.currTok().column))
+        break;
+      case "GTE":
+        this.consume()
+        this.tokens.push(new GreaterEqualToken(this.currTok().line, this.currTok().column))
         break;
       case "LT":
         this.consume()
-        this.tokens.push(new LessThanToken(this.currTok().line, this.currTok().column))
+        this.tokens.push(new LessToken(this.currTok().line, this.currTok().column))
+        break;
+      case "LTE":
+        this.consume()
+        this.tokens.push(new LessEqualToken(this.currTok().line, this.currTok().column))
         break;
       case "NOT":
         this.consume()
@@ -115,7 +123,7 @@ export class Parser {
     while (!this.currTok().value.endsWith('"')) {
       let rawVal = this.consume().value
 
-      if (rawVal.startsWith('"')) rawVal = rawVal.replace('"', '')
+      if (rawVal.startsWith('"')) rawVal = rawVal.slice(0, rawVal.length - 1).replaceAll('"', '')
 
       strValue += rawVal + " "
     }

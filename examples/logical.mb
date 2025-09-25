@@ -2,6 +2,9 @@
 2 GT 1 # -> Result: True
 2 LT 1 # -> Result: False
 
+13 GTE 10 # -> Result: True
+13 LTE 10 # -> Result: False
+
 True AND False # -> Result: False
 True OR False # -> Result: True
 NOT False # -> Result: True

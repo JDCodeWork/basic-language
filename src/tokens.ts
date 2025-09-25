@@ -26,7 +26,7 @@ abstract class TokenBase<T> implements IToken<T> {
     }
 }
 
-export class StrToken extends TokenBase<string> {
+export class StrToken extends TokenBase<string | null> {
     public type = 'STR'
 }
 
@@ -34,7 +34,7 @@ export class NumToken extends TokenBase<number | null> {
     public type = 'NUM'
 }
 
-export class BoolToken extends TokenBase<boolean> {
+export class BoolToken extends TokenBase<boolean | null> {
     public type = 'BOOL'
 
     constructor(
@@ -64,8 +64,8 @@ export class EqualityToken extends TokenBase<string> {
     }
 }
 
-export class GreaterThanToken extends TokenBase<string> {
-    public type = 'GREATER_THAN'
+export class GreaterToken extends TokenBase<string> {
+    public type = 'GREATER'
 
     constructor(
         line: number,
@@ -75,8 +75,8 @@ export class GreaterThanToken extends TokenBase<string> {
     }
 }
 
-export class LessThanToken extends TokenBase<string> {
-    public type = 'LESS_THAN'
+export class LessToken extends TokenBase<string> {
+    public type = 'LESS'
 
     constructor(
         line: number,
@@ -138,6 +138,28 @@ export class RightParen extends TokenBase<null> {
         column: number
     ) {
         super(null, line, column)
+    }
+}
+
+export class GreaterEqual extends TokenBase<string> {
+    public type = 'GREATER_EQUAL'
+
+    constructor(
+        line: number,
+        column: number
+    ) {
+        super('GTE', line, column)
+    }
+}
+
+export class LessEqual extends TokenBase<string> {
+    public type = 'LESS_EQUAL'
+
+    constructor(
+        line: number,
+        column: number
+    ) {
+        super('LTE', line, column)
     }
 }
 

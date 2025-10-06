@@ -179,7 +179,6 @@ export class JumpToken extends TokenBase<string> {
     public type = 'JUMP'
 }
 
-// TODO
 export class SectionToken extends TokenBase<string> {
     public type = 'SECTION'
 }

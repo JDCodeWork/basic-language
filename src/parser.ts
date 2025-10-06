@@ -123,7 +123,7 @@ export class Parser {
     while (!this.currTok().value.endsWith('"')) {
       let rawVal = this.consume().value
 
-      if (rawVal.startsWith('"')) rawVal = rawVal.slice(0, rawVal.length - 1).replaceAll('"', '')
+      if (rawVal.startsWith('"')) rawVal = rawVal.slice(1, rawVal.length)
 
       strValue += rawVal + " "
     }

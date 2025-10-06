@@ -2,20 +2,22 @@
 
 # Read the first number
 READ NUM AND PRINT "Enter the first number: "
-ASSIGN RO TO num1
+ASSIGN S TO num1
 
 # Read the second number
 READ NUM AND PRINT "Enter the second number: "
-ASSIGN RO TO num2
+ASSIGN S TO num2
 
 # Read the operation
+PRINT
 PRINT "Select an operation:"
 PRINT "1. Add"
 PRINT "2. Subtract"
 PRINT "3. Multiply"
 PRINT "4. Divide"
 READ NUM AND PRINT "Enter your choice (1-4): "
-ASSIGN RO TO choice
+ASSIGN S TO choice
+PRINT
 
 # Perform the selected operation
 JUMP add_section IF (choice EQ 1)
@@ -23,9 +25,10 @@ JUMP sub_section IF (choice EQ 2)
 JUMP mul_section IF (choice EQ 3)
 JUMP div_section IF (choice EQ 4)
 
-# Invalid choice
-PRINT "Invalid choice. Exiting."
-EXIT
+SECTION invalid_choice:
+    PRINT "Invalid choice. Please enter a number between 1 and 4."
+    EXIT
+END
 
 SECTION add_section:
     ASSIGN (ADD num1 num2) TO result
@@ -52,6 +55,7 @@ SECTION div_section:
     END
 
     ASSIGN (DIV num1 num2) TO result
-    PRINT "Result: " result
+    PRINT num1 STR( / ) num2 STR( = ) result
     EXIT
 END
+

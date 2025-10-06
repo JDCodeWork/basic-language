@@ -27,6 +27,7 @@ export class Parser {
         this.parseBool()
         break;
       case "STR":
+      case "STR(":
         this.parsePrimitiveStr()
         break;
       case "NUM":
@@ -145,15 +146,38 @@ export class Parser {
   }
 
   private parsePrimitiveStr() {
-    if (this.currTok().value == "STR") this.consume()
+    if (
+      this.currTok().value == "STR"
+      || this.currTok().value == "STR("
+    ) this.consume()
+
+    if (this.currTok().value.startsWith('STR(') && this.currTok().value.endsWith(')')) {
+      this.tokens.push(new StrToken(this.currTok().value.slice(4, this.currTok().value.length - 1), this.currTok().line, this.currTok().column))
+      this.consume()
+      return
+    }
 
     // Check correct syntax
-    if (!this.currTok().value.startsWith('(')) {
+    if (
+      !this.currTok().value.startsWith('(')
+      && !this.prevTok().value.endsWith('(')
+      && this.currTok().value[3] != '('
+    ) {
       throw new SyntaxError(`Invalid string at ${this.currTok().line}:${this.currTok().column}. String must be start with: (`)
     }
 
     let strValue = ''
     const startToken = this.currTok()
+    if (this.prevTok().value.endsWith('(')) strValue += " "
+
+    // If string contains more than one word
+    if (this.currTok().value.startsWith('STR(')) {
+      strValue += this.consume().value.slice(4)
+    }
+
+    if (this.currTok().value == ')') {
+      strValue += ' '
+    }
 
     // Sanitize string
     while (!this.currTok().value.endsWith(')')) {
@@ -194,6 +218,8 @@ export class Parser {
       this.parseStr()
     } else if (!isNaN(Number(currTokVal))) { // Modern Numbers
       this.parseNum()
+    } else if (currTokVal.startsWith('STR(')) {
+      this.parsePrimitiveStr()
     } else if (currTokVal.startsWith('(')) { // Start Group expression
       this.splitOpenRoundBracket()
     } else if (currTokVal.endsWith(')')) { // End Group expression
@@ -259,6 +285,9 @@ export class Parser {
 
   private currTok() {
     return this.rawTokens[this.col]
+  }
+  private prevTok() {
+    return this.rawTokens[this.col - 1]
   }
 
   private nextTok() {

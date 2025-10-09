@@ -231,27 +231,39 @@ export class Parser {
   }
 
   private splitOpenRoundBracket() {
-    this.tokens.push(new LeftParen(this.currTok().line, this.currTok().column))
+    const currentToken = this.currTok()
+    this.tokens.push(new LeftParen(currentToken.line, currentToken.column))
 
-    const rest = this.currTok().value.split('').slice(1)
+    const rest = currentToken.value.split('').slice(1)
     this.consume()
 
     if (rest.length > 0) {
-      const rawToken = { column: this.col, line: this.currTok().line, value: rest.join('') }
+      const rawToken = {
+        column: currentToken.column + 1,
+        line: currentToken.line,
+        value: rest.join('')
+      }
+
       this.rawTokens.splice(this.col, 0, rawToken)
     }
   }
 
   private splitCloseRoundBracket() {
-    const rest = this.currTok().value.split('').slice(0, -1)
+    const currentToken = this.currTok()
+    const rest = currentToken.value.split('').slice(0, -1)
 
     if (rest.length > 0) {
-      const rawToken = { column: this.col, line: this.currTok().line, value: rest.join('') }
+      const rawToken = {
+        column: currentToken.column,
+        line: currentToken.line,
+        value: rest.join('')
+      }
+
       this.rawTokens.splice(this.col, 0, rawToken)
       this.parseToken()
     }
 
-    this.tokens.push(new RightParen(this.currTok().line, this.currTok().column))
+    this.tokens.push(new RightParen(currentToken.line, currentToken.column + rest.length))
     this.consume()
   }
 

@@ -59,7 +59,6 @@ export class Interpreter {
                 this.interpretJump()
                 break;
             case "SECTION":
-                console.log("Reading section", this.current().literal)
                 this.readSection()
                 break;
             default:
@@ -366,23 +365,22 @@ export class Interpreter {
         this.flowControl[sectionLabel].end = this.pc
     }
 
-    // TODO: some sections are interpreted twice, fix that
     private readSection() {
-        const sectionLabel = this.consume().literal
+        const sectionTok = this.consume()
 
-        this.flowControl[sectionLabel] = {
+        this.flowControl[sectionTok.literal] = {
             start: this.pc,
             end: undefined
         }
 
-        while (this.current().type != "END") {
+        while (!(this.current().type == "END" && sectionTok.column == this.current().column)) {
             if (this.isAtEnd())
                 throw new RuntimeError("Unmatched section. Unexpected end of input.")
 
             this.consume()
         }
 
-        this.flowControl[sectionLabel].end = this.pc
+        this.flowControl[sectionTok.literal].end = this.pc
     }
 
     private evaluateValue() {

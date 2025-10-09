@@ -14,18 +14,21 @@ export class Scanner {
 
     scan() {
         const rawTokens: RawToken[] = []
-        const lines = this.source.trim().split('\n')
+        const lines = this.source.split('\n')
 
         for (const line of lines) {
             this.currLine++
             this.currCol = 0
 
             for (const word of line.split(' ')) {
-                if (word == "#" ) {
-                    break;
-                }
+                // If a comment is encountered, skip the rest of the line.
+                if (word == "#") break;
 
-                if(word.length == 0) continue;
+                // Skip empty words (which can occur with multiple spaces)
+                if (word.length == 0) continue;
+
+                // Calculate column considering leading whitespace and tabs
+                this.currCol = line.indexOf(word, this.currCol);
 
                 rawTokens.push({
                     value: word,
@@ -33,7 +36,8 @@ export class Scanner {
                     column: this.currCol
                 })
 
-                this.currCol += word.length + 1
+                // Move to the position after the current word and space
+                this.currCol += word.length + 1;
             }
         }
 

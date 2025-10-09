@@ -45,10 +45,7 @@ SECTION sub_section:
 END
 
 SECTION mul_section:
-    PRINT num1 num2
     ASSIGN (MUL num1 num2) TO result
-    PRINT "hELLO "
-
     PRINT num1 STR( * ) num2 STR( = ) result
     EXIT
 END

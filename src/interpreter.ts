@@ -1,4 +1,3 @@
-import { isConstructorDeclaration } from "typescript"
 import { type IToken } from "./tokens"
 import { RuntimeError, SemanticError } from "./utils"
 
@@ -17,8 +16,6 @@ export class Interpreter {
         while (!this.isAtEnd()) {
             this.interpretToken()
         }
-
-        console.log(this.flowControl)
     }
 
     private interpretToken() {
@@ -62,7 +59,8 @@ export class Interpreter {
                 this.interpretJump()
                 break;
             case "SECTION":
-                this.interpretSection()
+                console.log("Reading section", this.current().literal)
+                this.readSection()
                 break;
             default:
                 this.consume() // Ignore other tokens for now
@@ -207,7 +205,6 @@ export class Interpreter {
     }
 
     private interpretMacro() {
-        console.log("debung", this.current())
         switch (this.current().literal) {
             case "ADD":
                 this.interpretAddMarco()
@@ -256,7 +253,6 @@ export class Interpreter {
     }
 
     private interpretMulMacro() {
-        console.log("asd",this.current())
         this.consume()
 
         const leftVal = this.evaluateValue()
@@ -352,27 +348,41 @@ export class Interpreter {
         this.interpretSection()
     }
 
-    // TODO: make it works
     private interpretSection() {
-        this.flowControl[this.current().literal].start = this.pc
-        while (this.consume().type != "END") {
+        const sectionLabel = this.consume().literal
+
+        this.flowControl[sectionLabel] = {
+            start: this.pc,
+            end: undefined
+        }
+
+        while (this.current().type != "END") {
             if (this.isAtEnd())
                 throw new RuntimeError("Unmatched section. Unexpected end of input.")
 
-            // Nunca se crea la variable result
             this.interpretToken()
         }
 
-        this.flowControl[this.current().literal].end = this.pc
+        this.flowControl[sectionLabel].end = this.pc
     }
 
+    // TODO: some sections are interpreted twice, fix that
     private readSection() {
+        const sectionLabel = this.consume().literal
+
+        this.flowControl[sectionLabel] = {
+            start: this.pc,
+            end: undefined
+        }
+
         while (this.current().type != "END") {
             if (this.isAtEnd())
                 throw new RuntimeError("Unmatched section. Unexpected end of input.")
 
             this.consume()
         }
+
+        this.flowControl[sectionLabel].end = this.pc
     }
 
     private evaluateValue() {

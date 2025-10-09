@@ -4,8 +4,10 @@ import { RuntimeError, SemanticError } from "./utils"
 
 export class Interpreter {
     private pc: number = 0
+
     private stack = new Stack(32)
     private variables: Record<string, any> = {}
+    private flowControl: Record<string, Partial<{ start: number, end: number }>> = {}
 
     constructor(
         private tokens: IToken<any>[]
@@ -15,6 +17,8 @@ export class Interpreter {
         while (!this.isAtEnd()) {
             this.interpretToken()
         }
+
+        console.log(this.flowControl)
     }
 
     private interpretToken() {
@@ -53,6 +57,12 @@ export class Interpreter {
                 break;
             case "VAR":
                 this.interpretVar()
+                break;
+            case "JUMP":
+                this.interpretJump()
+                break;
+            case "SECTION":
+                this.interpretSection()
                 break;
             default:
                 this.consume() // Ignore other tokens for now
@@ -122,10 +132,6 @@ export class Interpreter {
 
     private interpretAnd() {
         this.consume() // Consume 'AND' token
-
-        if (this.current().type == "MACRO" && this.current().literal == "PRINT") {
-            return;
-        }
 
         const { leftVal, rightVal } = this.getBinaryValues()
 
@@ -201,6 +207,7 @@ export class Interpreter {
     }
 
     private interpretMacro() {
+        console.log("debung", this.current())
         switch (this.current().literal) {
             case "ADD":
                 this.interpretAddMarco()
@@ -227,7 +234,7 @@ export class Interpreter {
     }
 
     private interpretAddMarco() {
-        const addTok = this.consume()
+        this.consume()
 
         let leftVal = this.evaluateValue()
         const rightVal = this.evaluateValue()
@@ -249,6 +256,7 @@ export class Interpreter {
     }
 
     private interpretMulMacro() {
+        console.log("asd",this.current())
         this.consume()
 
         const leftVal = this.evaluateValue()
@@ -284,9 +292,13 @@ export class Interpreter {
         }
 
         let promptText = ""
-        if (this.current().type == "STR") {
+        if (this.current().type == "AND" && this.next().literal == "PRINT") {
+            this.consume()
+            this.consume()
+
             promptText = this.consume().literal
         }
+
 
         const val = prompt(promptText)
         switch (castType) {
@@ -316,6 +328,53 @@ export class Interpreter {
         console.log(printText)
     }
 
+    private interpretJump() {
+        const label = this.consume().literal
+
+        if (this.flowControl[label]) {
+            throw new SemanticError(`Label '${label}' already defined. Error at ${this.current().line}:${this.current().column}`);
+        }
+
+        if (this.consume().type != "IF")
+            throw new SyntaxError(`Expected 'IF' after jump label, but got '${this.current().type}'. Error at ${this.current().line}:${this.current().column}`);
+
+        const boolVal = this.evaluateExpression()
+        if (!boolVal) return
+
+        this.flowControl[label] = { start: undefined, end: undefined }
+        while (!(this.current().literal == label && this.current().type == "SECTION")) {
+            if (this.isAtEnd())
+                throw new RuntimeError("Unmatched jump. Unexpected end of input.")
+
+            this.consume()
+        }
+
+        this.interpretSection()
+    }
+
+    // TODO: make it works
+    private interpretSection() {
+        this.flowControl[this.current().literal].start = this.pc
+        while (this.consume().type != "END") {
+            if (this.isAtEnd())
+                throw new RuntimeError("Unmatched section. Unexpected end of input.")
+
+            // Nunca se crea la variable result
+            this.interpretToken()
+        }
+
+        this.flowControl[this.current().literal].end = this.pc
+    }
+
+    private readSection() {
+        while (this.current().type != "END") {
+            if (this.isAtEnd())
+                throw new RuntimeError("Unmatched section. Unexpected end of input.")
+
+            this.consume()
+        }
+    }
+
     private evaluateValue() {
         const tokType = this.current().type
 
@@ -332,18 +391,16 @@ export class Interpreter {
         if (tokType != "IDENT") return this.consume().literal
 
         const varName = String(this.consume().literal)
-        if (varName.length != 2 && !varName.startsWith('S')) {
-            return this.variables[varName]
+        if (varName.length != 1 && !varName.startsWith('S')) {
+            const varVal = this.variables[varName]
+
+            if (!varVal)
+                throw new SemanticError(`Variable '${varName}' is not defined. Error at ${this.previous().line}:${this.previous().column}`)
+
+            return varVal
         }
 
-        switch (varName[1]) {
-            case "F":
-                return this.stack.shift()
-            case "L":
-                return this.stack.pop()
-            default:
-                throw new SemanticError(`Invalid stack operation: '${varName}'. Error at ${this.previous().line}:${this.previous().column}`);
-        }
+        return this.stack.pop()
     }
 
     private evaluateExpression() {

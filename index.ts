@@ -22,6 +22,10 @@ async function main() {
         const rawTokens = new Scanner(fileSource).scan()
 
         const tokens = new Parser(rawTokens).parse()
+        tokens.forEach(t => {
+            console.log(t.toString())
+        });
+
         new Interpreter(tokens).interpret()
 
     } catch (error: any) {

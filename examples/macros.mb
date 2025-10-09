@@ -25,6 +25,8 @@ JUMP sub_section IF (choice EQ 2)
 JUMP mul_section IF (choice EQ 3)
 JUMP div_section IF (choice EQ 4)
 
+PRINT (choice EQ 1)
+
 SECTION invalid_choice:
     PRINT "Invalid choice. Please enter a number between 1 and 4."
     EXIT
@@ -32,19 +34,22 @@ END
 
 SECTION add_section:
     ASSIGN (ADD num1 num2) TO result
-    PRINT "Result: " result
+    PRINT num1 STR( + ) num2 STR( = ) result
     EXIT
 END
 
 SECTION sub_section:
     ASSIGN (SUB num1 num2) TO result
-    PRINT "Result: " result
+    PRINT num1 STR( - ) num2 STR( = ) result
     EXIT
 END
 
 SECTION mul_section:
+    PRINT num1 num2
     ASSIGN (MUL num1 num2) TO result
-    PRINT "Result: " result
+    PRINT "hELLO "
+
+    PRINT num1 STR( * ) num2 STR( = ) result
     EXIT
 END
 
@@ -58,4 +63,3 @@ SECTION div_section:
     PRINT num1 STR( / ) num2 STR( = ) result
     EXIT
 END
-

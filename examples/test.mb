@@ -1,8 +1,1 @@
-READ NUM AND PRINT "Ingresa el numero A:"
-ASSIGN SL TO num_a
-
-READ NUM AND PRINT "Ingresa el numero B:"
-ASSIGN SL TO num_b
-
-ASSIGN (ADD num_a num_b) TO sum
-PRINT STR (La suma es: ) sum 
+PRINT ((1 GT 2) OR (2 LT 5))

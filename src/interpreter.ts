@@ -61,6 +61,9 @@ export class Interpreter {
             case "SECTION":
                 this.readSection()
                 break;
+            case "IF":
+                this.interpretIf()
+                break;
             default:
                 this.consume() // Ignore other tokens for now
                 break;
@@ -223,6 +226,9 @@ export class Interpreter {
             case "PRINT":
                 this.interpretPrintMacro()
                 break;
+            case "EXIT":
+                this.interpretExitMacro()
+                break;
             default:
                 this.consume()
                 break;
@@ -323,6 +329,13 @@ export class Interpreter {
         console.log(printText)
     }
 
+    private interpretExitMacro() {
+        this.consume()
+
+        const exitCode = this.evaluateValue()
+        process.exit(exitCode ?? 0)
+    }
+
     private interpretJump() {
         const label = this.consume().literal
 
@@ -383,6 +396,31 @@ export class Interpreter {
         this.flowControl[sectionTok.literal].end = this.pc
     }
 
+    // FIXME: This is not working correctly when has something like ((1 EQ 0) OR (2 LT 1))
+    private interpretIf() {
+        const ifTok = this.consume()
+
+        const boolVal = this.evaluateExpression()
+
+        if (!boolVal) {
+            while (this.current().type != "END" && ifTok.column != this.current().column) {
+                if (this.isAtEnd())
+                    throw new RuntimeError("Unmatched if. Unexpected end of input.")
+
+                this.consume()
+            }
+
+            return
+        }
+
+        while (this.current().type != "END" && ifTok.column != this.current().column) {
+            if (this.isAtEnd())
+                throw new RuntimeError("Unmatched if. Unexpected end of input.")
+
+            this.interpretToken()
+        }
+    }
+
     private evaluateValue() {
         const tokType = this.current().type
 
@@ -402,7 +440,7 @@ export class Interpreter {
         if (varName.length != 1 && !varName.startsWith('S')) {
             const varVal = this.variables[varName]
 
-            if (!varVal)
+            if (varVal == undefined)
                 throw new SemanticError(`Variable '${varName}' is not defined. Error at ${this.previous().line}:${this.previous().column}`)
 
             return varVal
@@ -412,10 +450,14 @@ export class Interpreter {
     }
 
     private evaluateExpression() {
-        if (this.current().type != "LEFT_PAREN")
-            return this.consume().literal
+        if (this.consume().type != "LEFT_PAREN")
+            return this.previous().literal
 
-        this.consume() // consume LEFT_PAREN
+        if (this.current().type == "LEFT_PAREN") {
+            const val = this.evaluateExpression()
+            this.stack.push(val)
+        }
+
         while (this.current().type != "RIGHT_PAREN") {
             if (this.isAtEnd()) {
                 throw new RuntimeError("Unmatched parenthesis. Unexpected end of input.")

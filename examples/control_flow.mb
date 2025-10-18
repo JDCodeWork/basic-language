@@ -1,0 +1,49 @@
+# Control Flow Demo
+# This example demonstrates IF statements and JUMP/SECTION
+
+PRINT "=== CONTROL FLOW DEMO ==="
+PRINT
+
+# Simple IF statement
+READ NUM AND PRINT "Enter your age: "
+ASSIGN S TO age
+
+IF (age LT 18) THEN:
+    PRINT "You are a minor."
+END
+
+IF (age GTE 18) THEN:
+    PRINT "You are an adult."
+END
+
+PRINT
+
+# Multiple conditions with JUMP
+PRINT "Choose a color:"
+PRINT "1. Red"
+PRINT "2. Green"
+PRINT "3. Blue"
+READ NUM AND PRINT "Enter your choice (1-3): "
+ASSIGN S TO choice
+
+JUMP red_section IF (choice EQ 1)
+JUMP green_section IF (choice EQ 2)
+JUMP blue_section IF (choice EQ 3)
+
+PRINT "Invalid choice!"
+EXIT
+
+SECTION red_section:
+    PRINT "You chose RED - the color of passion!"
+    EXIT
+END
+
+SECTION green_section:
+    PRINT "You chose GREEN - the color of nature!"
+    EXIT
+END
+
+SECTION blue_section:
+    PRINT "You chose BLUE - the color of the sky!"
+    EXIT
+END

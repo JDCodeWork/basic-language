@@ -1,0 +1,66 @@
+# Grade Calculator
+# This program calculates letter grades based on numeric scores
+
+PRINT "=== GRADE CALCULATOR ==="
+PRINT
+
+READ NUM AND PRINT "Enter your score (0-100): "
+ASSIGN S TO score
+
+# Validate input
+IF (score LT 0) THEN:
+    PRINT "Error: Score cannot be negative!"
+    EXIT
+END
+
+IF (score GT 100) THEN:
+    PRINT "Error: Score cannot be greater than 100!"
+    EXIT
+END
+
+PRINT
+
+# Grade determination using JUMP
+JUMP grade_a IF (score GTE 90)
+JUMP grade_b IF (score GTE 80)
+JUMP grade_c IF (score GTE 70)
+JUMP grade_d IF (score GTE 60)
+JUMP grade_f IF (score LT 60)
+
+SECTION grade_f:
+  PRINT "Your score: " score
+  PRINT "Your grade: F - Failed"
+  PRINT "Please see your teacher for help."
+  EXIT
+END
+
+SECTION grade_a:
+    PRINT "Your score: " score
+    PRINT "Your grade: A - Excellent!"
+    
+    IF (score GTE 95) THEN:
+        PRINT "Outstanding performance!"
+    END
+    
+    EXIT
+END
+
+SECTION grade_b:
+    PRINT "Your score: " score
+    PRINT "Your grade: B - Good job!"
+    EXIT
+END
+
+SECTION grade_c:
+    PRINT "Your score: " score
+    PRINT "Your grade: C - Average"
+    PRINT "Keep working hard!"
+    EXIT
+END
+
+SECTION grade_d:
+    PRINT "Your score: " score
+    PRINT "Your grade: D - Below average"
+    PRINT "You need to study more."
+    EXIT
+END

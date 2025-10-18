@@ -1,0 +1,63 @@
+# Temperature Converter
+# Convert between Celsius and Fahrenheit
+
+PRINT "=== TEMPERATURE CONVERTER ==="
+PRINT
+PRINT "1. Celsius to Fahrenheit"
+PRINT "2. Fahrenheit to Celsius"
+READ NUM AND PRINT "Choose conversion type (1-2): "
+ASSIGN S TO conv_type
+
+JUMP celsius_to_fahrenheit IF (conv_type EQ 1)
+JUMP fahrenheit_to_celsius IF (conv_type EQ 2)
+
+PRINT "Invalid choice!"
+EXIT
+
+SECTION celsius_to_fahrenheit:
+    READ NUM AND PRINT "Enter temperature in Celsius: "
+    ASSIGN S TO celsius
+    
+    # Formula: F = (C * 9/5) + 32
+    ASSIGN (MUL celsius 9) TO temp_1
+    ASSIGN (DIV temp_1 5) TO temp_2
+    ASSIGN (ADD temp_2 32) TO fahrenheit
+    
+    PRINT
+    PRINT celsius "°C = " fahrenheit "°F"
+    
+    # Temperature comments
+    IF (fahrenheit LTE 32) THEN:
+        PRINT "Freezing or below!"
+    END
+    
+    IF (fahrenheit GTE 100) THEN:
+        PRINT "Very hot!"
+    END
+    
+    EXIT
+END
+
+SECTION fahrenheit_to_celsius:
+    READ NUM AND PRINT "Enter temperature in Fahrenheit: "
+    ASSIGN S TO fahrenheit
+    
+    # Formula: C = (F - 32) * 5/9
+    ASSIGN (SUB fahrenheit 32) TO temp_1
+    ASSIGN (MUL temp_1 5) TO temp_2
+    ASSIGN (DIV temp_2 9) TO celsius
+    
+    PRINT
+    PRINT fahrenheit "°F = " celsius "°C"
+    
+    # Temperature comments
+    IF (celsius LTE 0) THEN:
+        PRINT "Freezing or below!"
+    END
+    
+    IF (celsius GTE 37) THEN:
+        PRINT "Very hot!"
+    END
+    
+    EXIT
+END

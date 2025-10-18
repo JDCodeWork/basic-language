@@ -1,4 +1,50 @@
-ASSIGN 3.14 TO pi # -> Result: 3.14
+# Variables and Expressions Demo
+# This example shows how to use variables and expressions
 
-ASSIGN (ADD pi 2) TO pi_plus_two # -> Result: 5.14
-ASSIGN (pi GT 5) TO pi_gt_five # -> Result: False
+PRINT "=== VARIABLES DEMO ==="
+PRINT
+
+# Basic variable assignment
+ASSIGN 3.14159 TO pi
+PRINT "Pi = " pi
+PRINT
+
+# Arithmetic expressions
+ASSIGN (ADD pi 2) TO pi_plus_two
+ASSIGN (MUL pi 2) TO diameter
+ASSIGN (MUL pi pi) TO pi_squared
+
+PRINT "Pi + 2 = " pi_plus_two
+PRINT "2 * Pi = " diameter
+PRINT "Pi squared = " pi_squared
+PRINT
+
+# Boolean expressions with variables
+ASSIGN (pi GT 3) TO is_gt_3
+ASSIGN (pi LT 4) TO is_lt_4
+
+PRINT "Pi > 3? " is_gt_3
+PRINT "Pi < 4? " is_lt_4
+PRINT
+
+# Complex expressions
+ASSIGN 10 TO base
+ASSIGN 5 TO height
+ASSIGN (DIV (MUL base height) 2) TO area
+
+PRINT STR(Triangle with base=) base STR( and height=)  height
+PRINT "Area = " area
+PRINT
+
+# Using stack identifiers
+READ NUM AND PRINT "Enter a number: "
+ASSIGN S TO user_num
+
+ASSIGN (MUL user_num 2) TO doubled
+ASSIGN (ADD user_num 10) TO plus_ten
+
+PRINT "Your number doubled: " doubled
+PRINT "Your number plus 10: " plus_ten
+PRINT
+
+PRINT "Demo completed!"

@@ -1,13 +1,80 @@
-1 EQ 1 # -> Result: True
-2 GT 1 # -> Result: True
-2 LT 1 # -> Result: False
+# Logical Operations Demo
+# This example demonstrates all logical and comparison operators
 
-13 GTE 10 # -> Result: True
-13 LTE 10 # -> Result: False
+PRINT "=== COMPARISON OPERATORS ==="
+PRINT
 
-True AND False # -> Result: False
-True OR False # -> Result: True
-NOT False # -> Result: True
+# Equality
+ASSIGN (1 EQ 1) TO test_1
+ASSIGN (1 NOT EQ 2) TO test_2
+PRINT "1 == 1 is: " test_1
+PRINT "1 != 2 is: " test_2
+PRINT
 
-(1 EQ 1) AND (2 NOT EQ 2) # -> Result: False
-(2 GT 1) OR (2 LT 1) # -> Result: True
+# Greater than / Less than
+ASSIGN (5 GT 3) TO test_3
+ASSIGN (5 LT 3) TO test_4
+ASSIGN (5 GTE 5) TO test_5
+ASSIGN (3 LTE 5) TO test_6
+
+PRINT "5 > 3 is: " test_3
+PRINT "5 < 3 is: " test_4
+PRINT "5 >= 5 is: " test_5
+PRINT "3 <= 5 is: " test_6
+PRINT
+
+# Logical operators
+PRINT "=== LOGICAL OPERATORS ==="
+PRINT
+
+ASSIGN (True AND True) TO and_1
+ASSIGN (True AND False) TO and_2
+ASSIGN (False AND False) TO and_3
+
+PRINT "True AND True = " and_1
+PRINT "True AND False = " and_2
+PRINT "False AND False = " and_3
+PRINT
+
+ASSIGN (True OR False) TO or_1
+ASSIGN (False OR False) TO or_2
+PRINT "True OR False = " or_1
+PRINT "False OR False = " or_2
+PRINT
+
+ASSIGN (NOT True) TO not_1
+ASSIGN (NOT False) TO not_2
+PRINT "NOT True = " not_1
+PRINT "NOT False = " not_2
+PRINT
+
+# Complex expressions
+PRINT "=== COMPLEX EXPRESSIONS ==="
+PRINT
+
+ASSIGN ((10 GT 5) AND (5 GT 2)) TO complex_1
+ASSIGN ((10 LT 5) OR (5 GT 2)) TO complex_2
+ASSIGN (NOT (5 EQ 3)) TO complex_3
+
+PRINT "(10 > 5) AND (5 > 2) = " complex_1
+PRINT "(10 < 5) OR (5 > 2) = " complex_2
+PRINT "NOT (5 == 3) = " complex_3
+PRINT
+
+# Interactive test
+PRINT "=== INTERACTIVE TEST ==="
+READ NUM AND PRINT "Enter your age: "
+ASSIGN S TO age
+
+ASSIGN (age GTE 18) TO is_adult
+ASSIGN (age LTE 65) TO not_senior
+
+PRINT "Are you an adult? " is_adult
+PRINT "Are you under 65? " not_senior
+
+IF ((age GTE 18) AND (age LTE 65)) THEN:
+    PRINT "You are a working-age adult!"
+END
+
+PRINT
+PRINT "Demo completed!"

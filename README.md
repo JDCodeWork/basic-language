@@ -1,181 +1,220 @@
 # Modern Basic Language
 
-This document provides an overview of the Modern Basic programming language, including its syntax, data types, and features.
+**This is a personal practice project** created to deepen my understanding of how programming languages work internally. The language is inspired by classic BASIC, bringing its simplicity and readability to a modern implementation.
 
-## The Stack
+It features a stack-based architecture, dynamic typing, and a minimal but powerful set of built-in operations.
 
-The stack is a crucial component of the Modern Basic runtime. It serves as a temporary storage area for primitive values during program execution. When a value is needed for an operation or a function call, it can be pushed onto the stack. When the operation is complete, the value can be popped off the stack.
+## 📚 Documentation
 
-## Primitive Values
+- **[Syntax Guide (SYNTAX.md)](SYNTAX.md)** - Complete language reference, grammar, and detailed syntax
+- **[Examples](examples/)** - 8 sample programs demonstrating all language features
 
-Modern Basic supports the following primitive data types:
+## 🎯 Overview
 
-*   **Boolean (`BOOL`):** Represents truth values. `0` is treated as `False`, and any other number is treated as `True`. The literals `True` and `False` can also be used.
-*   **Number (`NUM`):** Represents both integers and floating-point numbers.
-*   **String (`STR`):** Represents a sequence of characters. Strings can be enclosed in double quotes (`"`) or parentheses (`()`).
+**Language Type:** Interpreted, dynamically-typed  
+**Paradigm:** Imperative, procedural  
+**Runtime:** [Bun](https://bun.sh/) (JavaScript/TypeScript)  
+**File Extension:** `.mb`
 
-### Syntax
+**Key Features:**
 
-```
-BOOL <value>  # 0 is False, any other number is True.
-True
-False
+- ✅ Three primitive types: Boolean, Number, String
+- ✅ Stack-based evaluation (32 elements max)
+- ✅ Dynamic typing
+- ✅ Control flow with IF, JUMP, and SECTION
+- ✅ Built-in I/O and arithmetic operations
+- ✅ Simple and readable syntax
 
-NUM <value>   # Can be any number (integer or float)
-123
-3.141516
+## 🚀 Quick Start
 
-STR (<value>) 
-"<value>"
-```
+### 1. Install Bun
 
-### Examples
+```bash
+# Linux/macOS
+curl -fsSL https://bun.sh/install | bash
 
-```
-ASSIGN BOOL 0 TO bool_var
-ASSIGN False TO bool_var_two
-
-ASSIGN NUM 3.1415 TO pi
-ASSIGN 3.1415 TO pi_two
-
-ASSIGN STR (Hello world) TO str_var
-ASSIGN "Hello world" TO str_var_two
+# Windows
+powershell -c "irm bun.sh/install.ps1 | iex"
 ```
 
-## Variables
+### 2. Clone and Run
 
-Variables are used to store and reference values.
+```bash
+git clone https://github.com/JDCodeWork/basic-language.git
+cd basic-language
 
-### Syntax
+# Install dependencies
+bun install
 
-```
-ASSIGN <value> TO <variable-name>
-```
-
-### Examples
-
-```
-ASSIGN 3.14 TO pi                  # Assigns the value 3.14 to the variable 'pi'
-ASSIGN (ADD pi 2) TO pi_plus_two   # Assigns the result of the expression to 'pi_plus_two'
-ASSIGN (pi GT 5) TO is_pi_gt_five     # Assigns the result of the comparison to 'pi_gt_five'
+# Run an example
+bun run index.ts examples/types.mb
 ```
 
-## Logical Operations
+### 3. Create Your First Program
 
-Modern Basic provides a set of logical operators for comparisons and boolean logic.
+Create a file `hello.mb`:
 
-### Syntax
+```basic
+PRINT "Hello, Modern Basic!"
 
-```
-<value> EQ  <value>  # Equal
-<value> GT  <value>  # Greater than
-<value> LT  <value>  # Less than
-<value> GTE <value>  # Greater than or equal to
-<value> LTE <value>  # Less than or equal to
+READ AND PRINT "What's your name? "
+ASSIGN S TO name
 
-<value> AND <value>  # Logical AND
-<value> OR  <value>  # Logical OR
-
-NOT <value>        # Logical NOT
+PRINT "Nice to meet you, " name "! "
 ```
 
-### Examples
+Run it:
 
-```
-1 EQ 1       # -> Result: True
-2 GT 1       # -> Result: True
-2 LT 1       # -> Result: False
-
-True AND False # -> Result: False
-True OR False  # -> Result: True
-NOT False      # -> Result: True
-
-(1 EQ 1) AND (2 NEQ 2) # -> Result: False
-(2 GT 1) OR (2 LT 1)   # -> Result: True
+```bash
+bun run index.ts hello.mb
+# Or
+bun . hello.mb
 ```
 
-## Macros
+## 📖 Language Basics
 
-Macros are built-in functions that provide additional functionality. By default, if a macro needs to store a value, it will use the stack.
+### Simple Program Example
 
-### `READ`
+```basic
+# Input
+READ NUM AND PRINT "Enter a number: "
+ASSIGN S TO num
 
-Reads a line from the console.
+# Processing
+ASSIGN (MUL num 2) TO result
 
-*   **`TYPE`:** The expected data type of the input (default is `STR`).
-*   **`prompt`:** A message to display before reading the input (default is an empty string).
-
-**Syntax:** `READ <?TYPE> <?prompt>`
-
-### `PRINT`
-
-Prints a value to the console.
-
-*   **`value`:** Can be a variable, a primitive value, or an expression.
-
-**Syntax:** `PRINT <value>`
-
-### `EXIT`
-
-Kill the program
-
-### Arithmetic Macros
-
-*   `ADD <value> <value>`: Adds two values.
-*   `SUB <value> <value>`: Subtracts the second value from the first.
-*   `MUL <value> <value>`: Multiplies two values.
-*   `DIV <value> <value>`: Divides the first value by the second.
-
-## Conditional Statements (`IF`)
-
-Executes a block of code if a condition is true.
-
-### Syntax
-
+# Output
+PRINT "Double of " num " is " result
 ```
-IF <condition> THEN:
-    # Code to execute if the condition is true
+
+### Core Concepts
+
+**Variables:**
+
+```basic
+ASSIGN 10 TO age
+ASSIGN "John" TO name
+ASSIGN (ADD 5 3) TO sum
+```
+
+**Conditionals:**
+
+```basic
+IF (age GT 18) THEN:
+    PRINT "Adult"
 END
 ```
 
-### Example
+**Control Flow:**
 
-```
-READ INT AND PRINT "What is your age?"
+```basic
+JUMP process IF (status EQ 1)
 
-ASSIGN R0 TO user_age
-
-IF (user_age GT 18) THEN:
-    PRINT "You are an adult."
-END
-
-IF (user_age LT 18) THEN:
-    PRINT "You are a minor."
+SECTION process:
+    PRINT "Processing..."
+    EXIT
 END
 ```
 
-## Control Flow (`JUMP` and `SECTION`)
+**Built-in Operations:**
 
-Transfers control to a different part of the program.
+- `ADD`, `SUB`, `MUL`, `DIV` - Arithmetic
+- `READ`, `PRINT` - I/O
+- `EQ`, `GT`, `LT`, `GTE`, `LTE` - Comparisons
+- `AND`, `OR`, `NOT` - Logical operators
 
-### Syntax
+For complete syntax details, see **[SYNTAX.md](SYNTAX.md)**.
+
+## 🎮 Available Examples
+
+Run any example with: `bun run index.ts examples/<filename>.mb`
+
+| Example | Description |
+|---------|-------------|
+| **types.mb** | Interactive demonstration of primitive types |
+| **variables.mb** | Variables, expressions, and user input |
+| **logical.mb** | All logical operations and comparisons |
+| **control_flow.mb** | IF statements and JUMP/SECTION |
+| **macros.mb** | Interactive calculator with control flow |
+| **grade_calculator.mb** | Score to letter grade converter |
+| **temperature_converter.mb** | Celsius ↔ Fahrenheit conversion |
+| **ATM.mb** | Complete ATM simulator |
+
+## 🏗️ Project Structure
 
 ```
-JUMP <section-name> IF <condition>
-
-SECTION <section-name>:
-    # Code block
-END
+basic-language/
+├── README.md           # This file - Getting started guide
+├── SYNTAX.md          # Complete language reference
+├── index.ts           # Interpreter entry point
+├── src/
+│   ├── scanner.ts     # Lexical analysis
+│   ├── parser.ts      # Syntax analysis
+│   ├── interpreter.ts # Execution engine
+│   ├── tokens.ts      # Token definitions
+│   └── utils.ts       # Error handling
+└── examples/          # Sample programs
 ```
 
-### Example
+## ⚠️ Known Limitations
 
-```
-ASSIGN True TO is_new_user
+- Stack limited to 32 elements
+- No loops (use `JUMP`/`SECTION` instead)
+- No user-defined functions
+- No arrays or complex data structures
+- No file I/O operations
 
-JUMP say_hi IF (is_new_user)
+## 🐛 Known Issues (Work in Progress)
 
-SECTION say_hi:
-    PRINT "Hello World"
-END
-```
+We are currently working on fixing the following bugs:
+
+- **String spacing in `STR()` syntax:** When using `PRINT STR(Some text)`, spaces between words are removed. For example:
+
+  ```basic
+  PRINT STR(The result is )  # Outputs: "Theresult is" instead of "The result is "
+  ```
+
+  **Workaround:** Use double-quoted strings for now:
+
+  ```basic
+  PRINT "The result is "  # Works correctly
+  ```
+
+- **String parsing in `PRINT` with mixed quotes:** When using `PRINT` with multiple strings and variables, strings with spaces inside quotes are incorrectly parsed as separate tokens. For example:
+
+  ```basic
+  PRINT "lorem" some_var " ipsum " some_other_var
+  # Error: Variable 'ipsum' is not defined
+  # The interpreter treats "ipsum" as a separate variable instead of part of the string
+  ```
+
+  **Workaround:** Concatenate strings without internal spaces or use `STR()` syntax:
+
+  ```basic
+  PRINT "lorem" some_var "ipsum" some_other_var  # Works
+  PRINT STR(lorem) some_var STR(ipsum) some_other_var  # Also works (but removes spaces)
+  ```
+
+If you encounter any bugs, please report them by [opening an issue](https://github.com/JDCodeWork/basic-language/issues).
+
+## 🔧 Technical Details
+
+Modern Basic is implemented in TypeScript and runs on Bun. The interpreter consists of three phases:
+
+1. **Scanner:** Source code → Raw tokens
+2. **Parser:** Raw tokens → Typed tokens
+3. **Interpreter:** Typed tokens → Execution
+
+For detailed technical information, architecture details, and performance characteristics, see [SYNTAX.md](SYNTAX.md).
+
+## 📚 Learning Resources
+
+- **[SYNTAX.md](SYNTAX.md)** - Complete language specification with:
+  - Detailed syntax rules and grammar
+  - All operators and built-in functions
+  - Type system and semantics
+  - Error handling details
+  - BNF grammar notation
+  - Complete code examples
+
+- **[examples/](examples/)** - Practical programs covering all features

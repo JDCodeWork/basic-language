@@ -1,8 +1,69 @@
-BOOL 0 # Literal: False
-BOOL 123 # Literal: True
+# Primitive Types Demo
+# This example demonstrates the three primitive types in Modern Basic
 
-STR (Hello world) # Literal: Hello world
-"Hello world 2" # Literal: Hello world 2
+PRINT "=== BOOLEAN TYPE ==="
+PRINT
 
-NUM 1234 # Literal: 1234
-324.123 # Literal: 324.123
+# Boolean values 
+ASSIGN BOOL 0 TO bool_false
+ASSIGN BOOL 123 TO bool_true
+ASSIGN True TO bool_literal_true
+
+PRINT "True literal: " bool_literal_true
+PRINT "0 inferrer: " bool_false
+PRINT "123 inferrer: " bool_true
+PRINT
+
+# Boolean operations
+PRINT "=== BOOLEAN OPERATIONS ==="
+ASSIGN (True AND True) TO and_result
+ASSIGN (True OR False) TO or_result
+ASSIGN (NOT False) TO not_result
+
+PRINT "True AND True = " and_result
+PRINT "True OR False = " or_result
+PRINT "NOT False = " not_result
+PRINT
+
+# Numbers
+PRINT "=== NUMBER TYPE ==="
+PRINT
+
+ASSIGN 1234 TO int_num
+ASSIGN 3.14159 TO float_num
+
+PRINT "Integer: " int_num
+PRINT "Float: " float_num
+PRINT
+
+# Number operations
+ASSIGN (ADD int_num 100) TO sum
+ASSIGN (MUL float_num 2) TO product
+
+PRINT "1234 + 100 = " sum
+PRINT "3.14159 * 2 = " product
+PRINT
+
+# Strings
+PRINT "=== STRING TYPE ==="
+PRINT
+
+ASSIGN STR (Hello world) TO str_parens
+ASSIGN "Hello world" TO str_quotes
+
+PRINT "String with parens: " str_parens
+PRINT "String with quotes: " str_quotes
+PRINT
+
+# Comparisons
+PRINT "=== COMPARISONS ==="
+PRINT
+
+ASSIGN (10 GT 5) TO comp_1
+ASSIGN (10 EQ 10) TO comp_2
+
+PRINT "10 > 5 is: " comp_1
+PRINT "10 == 10 is: " comp_2
+
+PRINT
+PRINT "Demo completed!"

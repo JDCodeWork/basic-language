@@ -1,1 +1,0 @@
-PRINT ((1 GT 2) OR (2 LT 5))

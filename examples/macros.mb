@@ -24,8 +24,7 @@ JUMP add_section IF (choice EQ 1)
 JUMP sub_section IF (choice EQ 2)
 JUMP mul_section IF (choice EQ 3)
 JUMP div_section IF (choice EQ 4)
-
-PRINT (choice EQ 1)
+JUMP invalid_choice IF ((choice LT 1) OR (choice GT 4))
 
 SECTION invalid_choice:
     PRINT "Invalid choice. Please enter a number between 1 and 4."

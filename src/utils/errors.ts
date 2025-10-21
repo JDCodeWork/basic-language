@@ -9,9 +9,3 @@ export class RuntimeError extends Error {
         super("Runtime", { cause: message })
     }
 }
-
-export class SemanticError extends Error {
-    constructor(message: string) {
-        super("Semantic", { cause: message })
-    }
-}

@@ -1,5 +1,5 @@
 import type { RawToken } from "./scanner";
-import { AndToken, BoolToken, RightParen, EndToken, EqualityToken, GreaterToken, IdentifierToken, IfToken, JumpToken, LessToken, MacroToken, NotToken, NumToken, LeftParen, OrToken, SectionToken, StrToken, VarToken, type IToken, GreaterEqual as GreaterEqualToken, LessEqual as LessEqualToken } from "./tokens";
+import { AndToken, BoolToken, RightParen, EndToken, EqualityToken, GreaterToken, IdentifierToken, IfToken, JumpToken, LessToken, MacroToken, NotToken, NumToken, LeftParen, OrToken, SectionToken, StrToken, VarToken, type IToken, GreaterEqual as GreaterEqualToken, LessEqual as LessEqualToken } from "./utils/tokens";
 
 const IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/
 

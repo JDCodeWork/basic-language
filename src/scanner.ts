@@ -1,46 +1,56 @@
-export interface RawToken {
-    value: string
-    line: number
-    column: number
-}
+import type { Token } from "./utils/tokens"
 
 export class Scanner {
-    private currLine = 0
-    private currCol = 0
+    private line = 0
+    private column = 0
+    private counter = 0
+
+    private tokens: Token[] = []
 
     constructor(
         private source: string
     ) { }
 
     scan() {
-        const rawTokens: RawToken[] = []
-        const lines = this.source.split('\n')
+        let word = ""
 
-        for (const line of lines) {
-            this.currLine++
-            this.currCol = 0
+        while (this.counter <= this.source.length) {
+            const char = this.consume()
 
-            for (const word of line.split(' ')) {
-                // If a comment is encountered, skip the rest of the line.
-                if (word == "#") break;
-
-                // Skip empty words (which can occur with multiple spaces)
-                if (word.length == 0) continue;
-
-                // Calculate column considering leading whitespace and tabs
-                this.currCol = line.indexOf(word, this.currCol);
-
-                rawTokens.push({
-                    value: word,
-                    line: this.currLine,
-                    column: this.currCol
-                })
-
-                // Move to the position after the current word and space
-                this.currCol += word.length + 1;
+            if (char == ' ') {
+                console.log(word)
+                word = ""
+                continue
             }
+
+            word += char
+        }
+    }
+
+
+    check(char: string) {
+        return char == this.source.charAt(this.counter + 1)
+    }
+
+    peek() {
+        return this.source.charAt(this.counter + 1)
+    }
+
+    consume() {
+        const char = this.source.charAt(this.counter)
+
+        if (char == '\n') {
+            this.line++
+            this.column = 0
         }
 
-        return rawTokens
+        this.column++
+        this.counter++
+
+        return char
+    }
+
+    getTokens() {
+        return this.tokens
     }
 }

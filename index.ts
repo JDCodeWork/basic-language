@@ -1,5 +1,3 @@
-import { Interpreter } from "./src/interpreter"
-import { Parser } from "./src/parser"
 import { Scanner } from "./src/scanner"
 
 async function readFile(filePath: string) {
@@ -19,12 +17,14 @@ async function main() {
         const filePath = process.argv[2]
 
         const fileSource = await readFile(filePath)
-        const rawTokens = new Scanner(fileSource).scan()
+        const sc = new Scanner(fileSource)
 
-        const tokens = new Parser(rawTokens).parse()
-
-        new Interpreter(tokens).interpret()
-
+        sc.scan()
+        sc
+            .getTokens()
+            .forEach(t =>
+                console.log(t.toString())
+            )
     } catch (error: any) {
         if (error.cause) {
             return console.error(`\n${error.message} >> ${error.cause}`)

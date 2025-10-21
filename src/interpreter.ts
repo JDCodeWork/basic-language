@@ -1,5 +1,5 @@
-import { type IToken } from "./tokens"
-import { RuntimeError, SemanticError } from "./utils"
+import { type IToken } from "./utils/tokens"
+import { RuntimeError, SemanticError } from "./utils/errors"
 
 export class Interpreter {
     private pc: number = 0
